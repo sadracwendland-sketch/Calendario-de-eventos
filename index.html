@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agenda de Eventos Stine 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --stine-green:#1a5632;
@@ -603,6 +606,10 @@ function wrapTextLines(ctx, text, maxWidth){
 
 async function renderInviteCanvas(canvas, template, ev, targetW, overrides){
   targetW = targetW || 1080;
+  try{
+    await document.fonts.load('700 100px "Oswald"');
+    await document.fonts.ready;
+  }catch(e){ /* se falhar o carregamento da webfont, segue com o fallback do navegador */ }
   const scale = targetW / template.wEMU;
   const targetH = Math.round(template.hEMU * scale);
   canvas.width = targetW;
@@ -637,7 +644,7 @@ async function renderInviteCanvas(canvas, template, ev, targetW, overrides){
       let fontPx = maxFontPx;
       let lines = [];
       while(true){
-        ctx.font = (shape.bold ? 'bold ' : '') + fontPx + 'px ' + family + 'Arial, sans-serif';
+        ctx.font = (shape.bold ? 'bold ' : '') + fontPx + 'px ' + family + '"Oswald", Arial, sans-serif';
         lines = [];
         txt.split('\n').forEach(paraLine=>{
           wrapTextLines(ctx, paraLine, w).forEach(l=> lines.push(l));
@@ -664,7 +671,7 @@ async function renderInviteCanvas(canvas, template, ev, targetW, overrides){
         fontPx = Math.max(MIN_FONT_PX, fontPx - 1);
       }
 
-      ctx.font = (shape.bold ? 'bold ' : '') + fontPx + 'px ' + family + 'Arial, sans-serif';
+      ctx.font = (shape.bold ? 'bold ' : '') + fontPx + 'px ' + family + '"Oswald", Arial, sans-serif';
       const lineHeight = fontPx * 1.25;
       let cursorY = y;
       lines.forEach(line=>{
