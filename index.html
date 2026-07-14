@@ -452,6 +452,14 @@ function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.get
 const TIPOS_EVENTO = ['DIA DE CAMPO','EXPOSTINE INDOOR','EXPOSTINE TURBO','TOUR TÉCNICO','EVENTO CORPORATIVO','FEIRA AGRÍCOLA','RODADA TÉCNICA','OUTRO'];
 const INVITE_STORE_KEY = 'stine_convite_templates';
 
+// ---------- Sincronização em nuvem dos modelos de convite (Supabase) ----------
+// Guarda os modelos .pptx (já processados em JSON) numa tabela compartilhada,
+// para que o upload feito pelo administrador reflita automaticamente para
+// qualquer pessoa que abrir o link, em qualquer computador.
+const SUPABASE_URL = 'https://joshgtpeemjdqbofcyhr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvc2hndHBlZW1qZHFib2ZjeWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTE3MjQsImV4cCI6MjA5NDM2NzcyNH0.PS2xxJmKHeRelN-qQJe7bV5JYTzyx2_PmvZqlrVGUaM';
+let CLOUD_SYNC_OK = true;
+
 function loadInviteTemplates(){
   try{ return JSON.parse(localStorage.getItem(INVITE_STORE_KEY)) || {}; }catch(e){ return {}; }
 }
@@ -459,9 +467,60 @@ function saveInviteTemplates(){
   try{
     localStorage.setItem(INVITE_STORE_KEY, JSON.stringify(INVITE_TEMPLATES));
   }catch(e){
-    alert('Não foi possível salvar o modelo de convite neste navegador — provavelmente o arquivo .pptx tem imagens muito pesadas e passou do limite de armazenamento local. Tente um .pptx mais leve (imagens menores/comprimidas).');
+    // Armazenamento local pode estourar o limite com pptx grandes — não é crítico,
+    // pois a fonte de verdade agora é a nuvem (Supabase); segue sem interromper o fluxo.
   }
 }
+
+async function fetchInviteTemplatesFromCloud(){
+  try{
+    const res = await fetch(SUPABASE_URL + '/rest/v1/stine_convite_templates?select=tipo,data', {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    rows.forEach(r=>{ INVITE_TEMPLATES[r.tipo] = r.data; });
+    saveInviteTemplates();
+    CLOUD_SYNC_OK = true;
+  }catch(e){
+    console.error('Falha ao buscar modelos de convite na nuvem, usando cópia local salva neste navegador.', e);
+    CLOUD_SYNC_OK = false;
+  }
+}
+
+async function pushInviteTemplateToCloud(tipo, templateObj){
+  try{
+    const res = await fetch(SUPABASE_URL + '/rest/v1/stine_convite_templates', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify([{ tipo: tipo, data: templateObj }])
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
+    return true;
+  }catch(e){
+    console.error('Falha ao enviar modelo de convite para a nuvem.', e);
+    return false;
+  }
+}
+
+async function deleteInviteTemplateFromCloud(tipo){
+  try{
+    const res = await fetch(SUPABASE_URL + '/rest/v1/stine_convite_templates?tipo=eq.' + encodeURIComponent(tipo), {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+    return res.ok;
+  }catch(e){
+    console.error('Falha ao remover modelo de convite na nuvem.', e);
+    return false;
+  }
+}
+
 let INVITE_TEMPLATES = loadInviteTemplates();
 
 function ensureJSZip(){
@@ -708,6 +767,10 @@ function templateUsesPlaceholder(template, name){
 }
 
 async function openInviteModalForEvent(ev){
+  // Garante que este visitante está vendo o modelo mais recente enviado pelo
+  // administrador, mesmo que tenha sido feito upload em outro computador
+  // enquanto esta aba já estava aberta.
+  await fetchInviteTemplatesFromCloud();
   const template = INVITE_TEMPLATES[ev.tipo];
   if(!template){
     alert('Ainda não existe um modelo de convite cadastrado para o tipo "'+ev.tipo+'". Peça para o administrador subir um modelo .pptx na área administrativa (seção "Modelos de convite").');
@@ -799,11 +862,15 @@ async function handleTemplateUpload(tipo, inputEl){
     INVITE_TEMPLATES[tipo] = parsed;
     saveInviteTemplates();
     renderInviteTemplatesList();
+    const synced = await pushInviteTemplateToCloud(tipo, parsed);
+    const syncMsg = synced
+      ? 'Modelo enviado para a nuvem — já está disponível para qualquer pessoa que abrir o link.'
+      : 'Atenção: não foi possível sincronizar com a nuvem agora (ficou salvo só neste navegador). Tente subir de novo em instantes.';
     if(templateUsesPlaceholder(parsed, 'DESCRICAO')){
-      alert('Modelo de convite carregado para "'+tipo+'"! Esse modelo tem um campo de descrição — defina o texto padrão em seguida.');
+      alert('Modelo de convite carregado para "'+tipo+'"! Esse modelo tem um campo de descrição — defina o texto padrão em seguida.\n\n'+syncMsg);
       openDescDefaultModal(tipo);
     } else {
-      alert('Modelo de convite carregado para "'+tipo+'"! (' + parsed.shapes.length + ' elementos detectados no slide)');
+      alert('Modelo de convite carregado para "'+tipo+'"! (' + parsed.shapes.length + ' elementos detectados no slide)\n\n'+syncMsg);
     }
   }catch(err){
     console.error(err);
@@ -824,22 +891,25 @@ function openDescDefaultModal(tipo){
 function closeDescDefaultModal(){
   document.getElementById('descDefaultOverlay').classList.remove('show');
 }
-function saveDescDefault(){
+async function saveDescDefault(){
   if(!CURRENT_DESC_TIPO) return;
   const tpl = INVITE_TEMPLATES[CURRENT_DESC_TIPO];
   if(!tpl) return;
   tpl.defaultDescription = document.getElementById('descDefaultTextarea').value;
   saveInviteTemplates();
+  const tipo = CURRENT_DESC_TIPO;
   closeDescDefaultModal();
-  alert('Descrição padrão salva para "'+CURRENT_DESC_TIPO+'".');
+  const synced = await pushInviteTemplateToCloud(tipo, tpl);
+  alert('Descrição padrão salva para "'+tipo+'".' + (synced ? ' (sincronizado com a nuvem)' : ' (atenção: não sincronizou com a nuvem agora, tente salvar de novo)'));
 }
 
 
-function removeInviteTemplate(tipo){
+async function removeInviteTemplate(tipo){
   if(!confirm('Remover o modelo de convite de "'+tipo+'"?')) return;
   delete INVITE_TEMPLATES[tipo];
   saveInviteTemplates();
   renderInviteTemplatesList();
+  await deleteInviteTemplateFromCloud(tipo);
 }
 
 function testInviteTemplate(tipo){
@@ -1300,6 +1370,14 @@ document.getElementById('adminSearch').addEventListener('input', renderAdminTabl
 
 populateFilterOptions();
 renderPublic();
+
+// Busca os modelos de convite mais recentes na nuvem assim que a página carrega,
+// garantindo que qualquer pessoa que abrir o link veja o modelo mais atual
+// (mesmo que o upload tenha sido feito em outro computador).
+fetchInviteTemplatesFromCloud().then(()=>{
+  renderPublic();
+  if(document.getElementById('inviteTemplatesList')) renderInviteTemplatesList();
+});
 </script>
 </body>
 </html>
