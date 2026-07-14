@@ -185,7 +185,7 @@
         <select id="fStatus"><option value="">Todos</option><option value="PLANEJADO">Planejado</option><option value="EXECUTADO">Executado</option></select>
       </div>
       <div class="field"><label>Buscar</label>
-        <input type="text" id="fSearch" placeholder="Nome, cidade, representante...">
+        <input type="text" id="fSearch" name="fSearchStine" autocomplete="off" placeholder="Nome, cidade, representante...">
       </div>
       <div class="view-toggle">
         <button id="btnCalView" class="active" onclick="setView('cal')">📅 Calendário</button>
@@ -239,7 +239,7 @@
             <select id="aStatus"><option value="">Todos</option><option value="PLANEJADO">Planejado</option><option value="EXECUTADO">Executado</option></select>
           </div>
           <div class="field"><label>Buscar</label>
-            <input type="text" id="adminSearch" placeholder="Cidade ou evento...">
+            <input type="text" id="adminSearch" name="adminSearchStine" autocomplete="off" placeholder="Cidade ou evento...">
           </div>
         </div>
         <div class="admin-table-wrap">
@@ -340,7 +340,8 @@
       <div class="full"><label>Staffer / KAM</label><input id="pub-staffer"></div>
       <div><label>Hora do evento</label><input type="time" id="pub-hora"></div>
       <div><label>Participantes (est.)</label><input id="pub-participantes"></div>
-      <div class="full"><label>Local / Observação</label><textarea id="pub-local" rows="2"></textarea></div>
+      <div class="full"><label>Local</label><textarea id="pub-local" rows="2"></textarea></div>
+      <div class="full"><label>Observação</label><textarea id="pub-observacao" rows="2"></textarea></div>
       <div class="full" style="display:flex; gap:8px; margin-top:6px;">
         <button type="submit" class="btn" style="background:var(--stine-green); color:#fff; flex:1;">Adicionar evento</button>
         <button type="button" class="btn" style="background:#eee;" onclick="closeNewEventModal()">Cancelar</button>
@@ -390,7 +391,8 @@
       <div><label>Participantes (est.)</label><input id="ev-participantes"></div>
       <div class="full"><label>Representante Stine</label><input id="ev-representante"></div>
       <div class="full"><label>Staffer / KAM</label><input id="ev-staffer"></div>
-      <div class="full"><label>Local / Observação</label><textarea id="ev-local" rows="2"></textarea></div>
+      <div class="full"><label>Local</label><textarea id="ev-local" rows="2"></textarea></div>
+      <div class="full"><label>Observação</label><textarea id="ev-observacao" rows="2"></textarea></div>
       <div class="full" style="display:flex; gap:8px; margin-top:6px;">
         <button type="submit" class="btn" style="background:var(--stine-green); color:#fff; flex:1;">Salvar</button>
         <button type="button" class="btn" style="background:#eee;" onclick="closeAdminEvModal()">Cancelar</button>
@@ -581,7 +583,7 @@ function buildInviteDataMap(ev, overrides){
     HORA: ev.hora || '',
     CIDADE_UF: [ev.cidade, ev.uf].filter(Boolean).join(' / '),
     LOCAL: ev.local || '',
-    OBSERVACAO: ev.local || '',
+    OBSERVACAO: ev.observacao || '',
     REPRESENTANTE: ev.representante || '',
     STAFFER: ev.staffer || '',
     STATUS: ev.status === 'EXECUTADO' ? 'Realizado' : 'Planejado',
@@ -898,7 +900,7 @@ function showDetail(ev){
   document.getElementById('detStatus').textContent = ev.status;
   document.getElementById('detHora').textContent = ev.hora || '—';
   document.getElementById('detPart').textContent = ev.participantes || '—';
-  document.getElementById('detObs').textContent = ev.local || '—';
+  document.getElementById('detObs').textContent = ev.observacao || '—';
   CURRENT_DETAIL_EVENT_ID = ev.id;
   const btnConvite = document.getElementById('btnGerarConviteDetail');
   const hasTemplate = !!INVITE_TEMPLATES[ev.tipo];
@@ -958,7 +960,7 @@ function getFilteredGeneric(prefix){
     if(tipo && e.tipo!==tipo) return false;
     if(status && e.status!==status) return false;
     if(q){
-      const hay = [e.nome,e.cidade,e.representante,e.staffer,e.local].join(' ').toLowerCase();
+      const hay = [e.nome,e.cidade,e.representante,e.staffer,e.local,e.observacao].join(' ').toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -1084,6 +1086,7 @@ function savePublicEvent(evt){
     uf: document.getElementById('pub-uf').value.toUpperCase(),
     cultura: document.getElementById('pub-cultura').value,
     local: document.getElementById('pub-local').value,
+    observacao: document.getElementById('pub-observacao').value,
     representante: document.getElementById('pub-representante').value,
     staffer: document.getElementById('pub-staffer').value,
     status: 'PLANEJADO',
@@ -1183,6 +1186,7 @@ function editEvent(id){
   document.getElementById('ev-representante').value = e.representante||'';
   document.getElementById('ev-staffer').value = e.staffer||'';
   document.getElementById('ev-local').value = e.local||'';
+  document.getElementById('ev-observacao').value = e.observacao||'';
   document.getElementById('formTitle').textContent = '✏️ Editar evento #'+e.id;
   document.getElementById('adminEvOverlay').classList.add('show');
 }
@@ -1208,6 +1212,7 @@ function saveEvent(evt){
     uf: document.getElementById('ev-uf').value.toUpperCase(),
     cultura: document.getElementById('ev-cultura').value,
     local: document.getElementById('ev-local').value,
+    observacao: document.getElementById('ev-observacao').value,
     representante: document.getElementById('ev-representante').value,
     staffer: document.getElementById('ev-staffer').value,
     status: document.getElementById('ev-status').value,
@@ -1244,7 +1249,8 @@ function exportXLSX(){
     ['cidade','Cidade'],
     ['uf','UF'],
     ['cultura','Cultura'],
-    ['local','Local / Observação'],
+    ['local','Local'],
+    ['observacao','Observação'],
     ['representante','Representante Stine'],
     ['staffer','Staffer / KAM'],
     ['status','Status'],
@@ -1257,7 +1263,7 @@ function exportXLSX(){
     return row;
   });
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = cols.map(function(pair){ return { wch: (pair[0]==='nome'||pair[0]==='local') ? 40 : 16 }; });
+  ws['!cols'] = cols.map(function(pair){ return { wch: (pair[0]==='nome'||pair[0]==='local'||pair[0]==='observacao') ? 40 : 16 }; });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Eventos 2026');
   XLSX.writeFile(wb, 'agenda_eventos_stine_2026.xlsx');
