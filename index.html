@@ -1077,7 +1077,7 @@ function renderCalendar(list){
   document.getElementById('calTitle').textContent = `${MESES[m]} de ${y}`;
   const firstDow = new Date(y,m,1).getDay();
   const daysInMonth = new Date(y,m+1,0).getDate();
-  const todayISO = new Date().toISOString().slice(0,10);
+  const todayIsoLocal = todayISO(); // data local (não UTC) para marcar corretamente o dia de hoje
 
   const byDay = {};
   list.forEach(e=>{
@@ -1095,7 +1095,7 @@ function renderCalendar(list){
   for(let day=1; day<=daysInMonth; day++){
     const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const dayEvents = byDay[iso]||[];
-    const isToday = iso===todayISO;
+    const isToday = iso===todayIsoLocal;
     let chips = dayEvents.slice(0,3).map(e=>
       `<div class="ev-chip ${tipoClass(e.tipo)} status-${e.status}" onclick='showDetailById(${e.id})' title="${e.nome.replace(/"/g,'&quot;')}">${e.nome}</div>`
     ).join('');
