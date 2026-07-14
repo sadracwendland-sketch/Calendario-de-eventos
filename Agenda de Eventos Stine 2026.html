@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda de Eventos Stine 2026</title>
+<style>
+  :root{
+    --stine-green:#1a5632;
+    --stine-green-light:#2d7a49;
+    --stine-yellow:#f4b400;
+    --bg:#f5f6f4;
+    --card:#ffffff;
+    --text:#1f2a24;
+    --muted:#6b7770;
+    --border:#e1e5e0;
+    --danger:#c0392b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--text);
+  }
+  header{
+    background:linear-gradient(120deg,var(--stine-green),var(--stine-green-light));
+    color:#fff; padding:22px 28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  header h1{margin:0; font-size:22px; font-weight:700; letter-spacing:.3px;}
+  header p{margin:2px 0 0; font-size:13px; opacity:.85;}
+  .btn{
+    border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer;
+    transition:transform .1s ease, box-shadow .1s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-admin{background:var(--stine-yellow); color:#26310f;}
+  .btn-ghost{background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.4);}
+  main{max-width:1280px; margin:0 auto; padding:22px 20px 60px;}
+
+  .toolbar{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:var(--card);
+    border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:18px;
+  }
+  .toolbar select, .toolbar input{
+    padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:#fff; color:var(--text);
+  }
+  .toolbar label{font-size:11px; color:var(--muted); display:block; margin-bottom:3px; font-weight:600; text-transform:uppercase; letter-spacing:.4px;}
+  .field{display:flex; flex-direction:column;}
+  .view-toggle{display:flex; gap:6px; margin-left:auto;}
+  .view-toggle button{
+    padding:8px 14px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:13px; font-weight:600; color:var(--muted);
+  }
+  .view-toggle button.active{background:var(--stine-green); color:#fff; border-color:var(--stine-green);}
+
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px;}
+  .kpi{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px;}
+  .kpi .num{font-size:26px; font-weight:800; color:var(--stine-green);}
+  .kpi .lbl{font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.3px;}
+
+  /* Calendar */
+  .cal-header{display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:14px;}
+  .cal-header button{background:var(--card); border:1px solid var(--border); border-radius:8px; width:34px; height:34px; cursor:pointer; font-size:15px;}
+  .cal-header h2{margin:0; font-size:18px; text-transform:capitalize; min-width:220px; text-align:center;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .cal-dow{text-align:center; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; padding:4px 0;}
+  .cal-day{
+    background:var(--card); border:1px solid var(--border); border-radius:10px; min-height:96px; padding:6px;
+    display:flex; flex-direction:column; gap:4px; overflow:hidden;
+  }
+  .cal-day.empty{background:transparent; border:none;}
+  .cal-day .d-num{font-size:12px; font-weight:700; color:var(--muted);}
+  .cal-day.today .d-num{color:var(--stine-green);}
+  .cal-day.today{outline:2px solid var(--stine-green);}
+  .ev-chip{
+    font-size:10.5px; padding:3px 6px; border-radius:6px; color:#fff; cursor:pointer; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; font-weight:600;
+  }
+  .ev-chip.status-EXECUTADO{opacity:.55;}
+  .more-chip{font-size:10px; color:var(--muted); cursor:pointer; font-weight:600;}
+
+  /* tipo colors */
+  .t-DIA-DE-CAMPO{background:#2d7a49;}
+  .t-EXPOSTINE-INDOOR{background:#f4b400; color:#3a2c00 !important;}
+  .t-EXPOSTINE-TURBO{background:#e67e22; color:#3a1f00 !important;}
+  .t-TOUR-TÉCNICO{background:#3465a4;}
+  .t-EVENTO-CORPORATIVO{background:#8e44ad;}
+  .t-FEIRA-AGRÍCOLA{background:#c0392b;}
+  .t-RODADA-TÉCNICA{background:#16a085;}
+  .t-OUTRO{background:#7f8c8d;}
+
+  /* List view */
+  table{width:100%; border-collapse:collapse; background:var(--card); border-radius:12px; overflow:hidden; border:1px solid var(--border);}
+  thead th{background:#eef1ee; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:var(--muted); padding:10px 12px;}
+  tbody td{padding:10px 12px; font-size:13px; border-top:1px solid var(--border); vertical-align:top;}
+  tbody tr:hover{background:#f8faf8;}
+  .badge{display:inline-block; padding:3px 9px; border-radius:20px; font-size:10.5px; font-weight:700; color:#fff;}
+  .status-badge.PLANEJADO{background:#3465a4;}
+  .status-badge.EXECUTADO{background:#7f8c8d;}
+
+  /* Modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(20,30,20,.55); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{background:#fff; border-radius:14px; max-width:480px; width:100%; padding:22px; box-shadow:0 20px 60px rgba(0,0,0,.3); max-height:88vh; overflow:auto;}
+  .modal h3{margin:0 0 12px; color:var(--stine-green);}
+  .modal .row{margin-bottom:8px; font-size:13.5px;}
+  .modal .row b{color:var(--muted); font-weight:600; display:inline-block; min-width:110px;}
+  .modal-close{float:right; background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted);}
+
+  /* Admin */
+  #adminPanel{display:none;}
+  #adminPanel.show{display:block;}
+  .admin-bar{background:#fff3cd; border:1px solid #f4b400; border-radius:10px; padding:10px 16px; margin-bottom:16px; font-size:13px; display:flex; justify-content:space-between; align-items:center;}
+  .admin-grid{display:grid; grid-template-columns:2fr 1fr; gap:18px;}
+  .panel{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px;}
+  .panel h3{margin-top:0; font-size:15px;}
+  form.ev-form{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  form.ev-form .full{grid-column:1/-1;}
+  form.ev-form label{font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;}
+  form.ev-form input, form.ev-form select, form.ev-form textarea{
+    width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; margin-top:3px;
+  }
+  .chart-bar{display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12px;}
+  .chart-bar .label{width:130px; color:var(--muted); font-weight:600;}
+  .chart-bar .bar-bg{flex:1; background:#eef1ee; border-radius:6px; height:14px; overflow:hidden;}
+  .chart-bar .bar-fill{height:100%; background:var(--stine-green);}
+  .chart-bar .val{width:30px; text-align:right; font-weight:700;}
+  .admin-table-wrap{max-height:420px; overflow:auto; margin-top:10px;}
+  .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:2px 5px;}
+  .icon-btn.del:hover{color:var(--danger);}
+  .icon-btn.edit:hover{color:var(--stine-green);}
+  footer{text-align:center; color:var(--muted); font-size:12px; padding:20px;}
+  .hint{font-size:11px; color:var(--muted); margin-top:6px;}
+  #loginBox input{padding:10px; border-radius:8px; border:1px solid var(--border); width:100%; margin:10px 0;}
+  #loginErr{color:var(--danger); font-size:12px; display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🌱 Agenda de Eventos Stine 2026</h1>
+    <p id="subtitle">Calendário compartilhado do time de Marketing &amp; Comercial</p>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <button class="btn" id="btnNewEventPublic" style="background:#fff; color:var(--stine-green);" onclick="openNewEventModal()">➕ Novo evento</button>
+    <button class="btn btn-ghost" id="btnPublic" style="display:none;" onclick="exitAdmin()">← Voltar à agenda</button>
+    <button class="btn btn-admin" id="btnAdmin" onclick="openLogin()">🔒 Área Administrativa</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- PUBLIC VIEW -->
+  <div id="publicView">
+    <div class="kpis" id="kpisPublic"></div>
+
+    <div class="toolbar">
+      <div class="field"><label>Mês / Ano</label>
+        <select id="fMonth"></select>
+      </div>
+      <div class="field"><label>UF</label>
+        <select id="fUF"><option value="">Todas</option></select>
+      </div>
+      <div class="field"><label>Tipo de evento</label>
+        <select id="fTipo"><option value="">Todos</option></select>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="fStatus"><option value="">Todos</option><option value="PLANEJADO">Planejado</option><option value="EXECUTADO">Executado</option></select>
+      </div>
+      <div class="field"><label>Buscar</label>
+        <input type="text" id="fSearch" placeholder="Nome, cidade, representante...">
+      </div>
+      <div class="view-toggle">
+        <button id="btnCalView" class="active" onclick="setView('cal')">📅 Calendário</button>
+        <button id="btnListView" onclick="setView('list')">📋 Lista</button>
+      </div>
+    </div>
+
+    <div id="calendarView">
+      <div class="cal-header">
+        <button onclick="changeMonth(-1)">‹</button>
+        <h2 id="calTitle"></h2>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calDow"></div>
+      <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
+    </div>
+
+    <div id="listView" style="display:none;">
+      <table>
+        <thead><tr>
+          <th>Data</th><th>Evento</th><th>Tipo</th><th>Cidade/UF</th><th>Representante</th><th>Status</th>
+        </tr></thead>
+        <tbody id="listBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="adminPanel">
+    <div class="admin-bar">
+      <span>🔒 Modo administrador ativo — visível apenas para quem tem a senha de gestão.</span>
+      <button class="btn" style="background:#26310f;color:#fff;" onclick="exitAdmin()">Sair do modo admin</button>
+    </div>
+
+    <div class="kpis" id="kpisAdmin"></div>
+
+    <div class="admin-grid">
+      <div class="panel">
+        <h3>Todos os eventos (editar / excluir)</h3>
+        <div class="toolbar" style="margin-bottom:12px;">
+          <div class="field"><label>Mês / Ano</label>
+            <select id="aMonth"></select>
+          </div>
+          <div class="field"><label>UF</label>
+            <select id="aUF"><option value="">Todas</option></select>
+          </div>
+          <div class="field"><label>Tipo de evento</label>
+            <select id="aTipo"><option value="">Todos</option></select>
+          </div>
+          <div class="field"><label>Status</label>
+            <select id="aStatus"><option value="">Todos</option><option value="PLANEJADO">Planejado</option><option value="EXECUTADO">Executado</option></select>
+          </div>
+          <div class="field"><label>Buscar</label>
+            <input type="text" id="adminSearch" placeholder="Cidade ou evento...">
+          </div>
+        </div>
+        <div class="admin-table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Evento</th><th>Cidade/UF</th><th>Status</th><th></th></tr></thead>
+            <tbody id="adminTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Ações</h3>
+        <button class="btn" style="background:var(--stine-green); color:#fff; width:100%;" onclick="openAdminEvModal()">➕ Novo evento</button>
+        <div class="hint">Alterações ficam salvas neste navegador (localStorage). Use "Exportar Excel" para gerar uma planilha .xlsx atualizada.</div>
+        <button class="btn" style="background:var(--stine-green); color:#fff; margin-top:10px; width:100%;" onclick="exportXLSX()">📊 Exportar eventos (Excel .xlsx)</button>
+        <button class="btn" style="background:#eee; margin-top:8px; width:100%;" onclick="restoreOriginal()">↺ Restaurar dados originais da planilha</button>
+
+        <h3 style="margin-top:22px;">Distribuição por tipo</h3>
+        <div id="chartTipo"></div>
+        <h3>Distribuição por UF</h3>
+        <div id="chartUF"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h3>🎟️ Modelos de convite (.pptx) por tipo de evento</h3>
+      <p class="hint" style="margin-top:-4px; font-size:12px;">
+        Suba um arquivo .pptx (1 slide) com caixas de texto usando placeholders como
+        <code>{{EVENTO}}</code>, <code>{{DATA}}</code>, <code>{{DIA}}</code>, <code>{{MES}}</code>, <code>{{ANO}}</code>,
+        <code>{{HORA}}</code>, <code>{{CIDADE_UF}}</code>, <code>{{LOCAL}}</code>, <code>{{OBSERVACAO}}</code>,
+        <code>{{DESCRICAO}}</code>, <code>{{REPRESENTANTE}}</code>, <code>{{TIPO}}</code>,
+        <code>{{STATUS}}</code>, <code>{{CULTURA}}</code>. O campo <code>{{DESCRICAO}}</code> é especial: você define um texto
+        padrão aqui mesmo (botão "📝 Descrição padrão"), e quem for gerar o convite pode editá-lo na hora antes de baixar.
+        Assim que alguém cadastrar um evento desse tipo, o botão "Gerar Convite" já usa esse modelo pra montar o PNG automaticamente.
+        O modelo fica salvo neste navegador (localStorage) — evite pptx com imagens muito pesadas.
+      </p>
+      <div id="inviteTemplatesList"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>Agenda de Eventos Stine · Gerado a partir da base "Calendário de eventos Stine 2026" · Uso interno</footer>
+
+<!-- Login modal -->
+<div class="overlay" id="loginOverlay">
+  <div class="modal" style="max-width:340px;">
+    <button class="modal-close" onclick="closeLogin()">×</button>
+    <h3>Acesso administrativo</h3>
+    <p style="font-size:13px;color:var(--muted);">Informe a senha de gestão para ver o dashboard e editar eventos.</p>
+    <div id="loginBox">
+      <input type="password" id="pwInput" placeholder="Senha" onkeydown="if(event.key==='Enter')tryLogin()">
+      <div id="loginErr">Senha incorreta.</div>
+      <button class="btn" style="background:var(--stine-green); color:#fff; width:100%;" onclick="tryLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Event detail modal -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDetail()">×</button>
+    <h3 id="detNome"></h3>
+    <div class="row"><b>Tipo</b> <span id="detTipo"></span></div>
+    <div class="row"><b>Data</b> <span id="detData"></span></div>
+    <div class="row"><b>Local</b> <span id="detCidade"></span></div>
+    <div class="row"><b>Cultura</b> <span id="detCultura"></span></div>
+    <div class="row"><b>Representante</b> <span id="detRep"></span></div>
+    <div class="row"><b>Staffer / KAM</b> <span id="detStaff"></span></div>
+    <div class="row"><b>Status</b> <span id="detStatus"></span></div>
+    <div class="row"><b>Hora</b> <span id="detHora"></span></div>
+    <div class="row"><b>Participantes (est.)</b> <span id="detPart"></span></div>
+    <div class="row"><b>Observação</b> <span id="detObs"></span></div>
+    <button class="btn" id="btnGerarConviteDetail" style="background:var(--stine-green); color:#fff; width:100%; margin-top:14px;" onclick="openInviteModalById(CURRENT_DETAIL_EVENT_ID)">🎟️ Gerar Convite</button>
+  </div>
+</div>
+
+<!-- New event modal (público, sem necessidade de admin) -->
+<div class="overlay" id="newEventOverlay">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeNewEventModal()">×</button>
+    <h3>➕ Novo evento</h3>
+    <p style="font-size:12.5px;color:var(--muted); margin-top:-6px;">Qualquer pessoa com este arquivo pode cadastrar um evento. O evento entra automaticamente como "Planejado".</p>
+    <form class="ev-form" id="pubEvForm" onsubmit="savePublicEvent(event)">
+      <div class="full"><label>Nome do evento</label><input id="pub-nome" required></div>
+      <div><label>Data inicial</label><input type="date" id="pub-dataInicial" required></div>
+      <div><label>Data final</label><input type="date" id="pub-dataFinal"></div>
+      <div><label>Tipo</label>
+        <select id="pub-tipo">
+          <option>DIA DE CAMPO</option><option>EXPOSTINE INDOOR</option><option>EXPOSTINE TURBO</option><option>TOUR TÉCNICO</option>
+          <option>EVENTO CORPORATIVO</option><option>FEIRA AGRÍCOLA</option><option>RODADA TÉCNICA</option><option>OUTRO</option>
+        </select>
+      </div>
+      <div><label>Cultura</label><input id="pub-cultura"></div>
+      <div><label>Cidade</label><input id="pub-cidade"></div>
+      <div><label>UF</label><input id="pub-uf" maxlength="2" style="text-transform:uppercase;"></div>
+      <div class="full"><label>Representante Stine</label><input id="pub-representante"></div>
+      <div class="full"><label>Staffer / KAM</label><input id="pub-staffer"></div>
+      <div><label>Hora do evento</label><input type="time" id="pub-hora"></div>
+      <div><label>Participantes (est.)</label><input id="pub-participantes"></div>
+      <div class="full"><label>Local / Observação</label><textarea id="pub-local" rows="2"></textarea></div>
+      <div class="full" style="display:flex; gap:8px; margin-top:6px;">
+        <button type="submit" class="btn" style="background:var(--stine-green); color:#fff; flex:1;">Adicionar evento</button>
+        <button type="button" class="btn" style="background:#eee;" onclick="closeNewEventModal()">Cancelar</button>
+      </div>
+    </form>
+    <div class="hint">Este evento fica salvo neste navegador (localStorage). Para o time inteiro ver, quem cadastrou deve avisar o administrador para consolidar no arquivo oficial (área administrativa → Exportar Excel).</div>
+  </div>
+</div>
+
+<!-- Descricao padrao (por tipo de convite) modal -->
+<div class="overlay" id="descDefaultOverlay">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeDescDefaultModal()">×</button>
+    <h3 id="descDefaultTitle">Descrição padrão</h3>
+    <p style="font-size:12.5px;color:var(--muted); margin-top:-6px;">Esse texto aparece por padrão sempre que alguém gerar um convite desse tipo — a pessoa ainda pode editar antes de gerar o PNG final.</p>
+    <textarea id="descDefaultTextarea" rows="6" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px;"></textarea>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="btn" style="background:var(--stine-green); color:#fff; flex:1;" onclick="saveDescDefault()">Salvar</button>
+      <button class="btn" style="background:#eee;" onclick="closeDescDefaultModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin edit/new event modal -->
+<div class="overlay" id="adminEvOverlay">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="closeAdminEvModal()">×</button>
+    <h3 id="formTitle">➕ Novo evento</h3>
+    <form class="ev-form" id="evForm" onsubmit="saveEvent(event)">
+      <input type="hidden" id="ev-id">
+      <div class="full"><label>Nome do evento</label><input id="ev-nome" required></div>
+      <div><label>Data inicial</label><input type="date" id="ev-dataInicial" required></div>
+      <div><label>Data final</label><input type="date" id="ev-dataFinal" required></div>
+      <div><label>Tipo</label>
+        <select id="ev-tipo">
+          <option>DIA DE CAMPO</option><option>EXPOSTINE INDOOR</option><option>EXPOSTINE TURBO</option><option>TOUR TÉCNICO</option>
+          <option>EVENTO CORPORATIVO</option><option>FEIRA AGRÍCOLA</option><option>RODADA TÉCNICA</option><option>OUTRO</option>
+        </select>
+      </div>
+      <div><label>Status</label>
+        <select id="ev-status"><option>PLANEJADO</option><option>EXECUTADO</option></select>
+      </div>
+      <div><label>Cidade</label><input id="ev-cidade"></div>
+      <div><label>UF</label><input id="ev-uf" maxlength="2" style="text-transform:uppercase;"></div>
+      <div><label>Cultura</label><input id="ev-cultura"></div>
+      <div><label>Hora do evento</label><input type="time" id="ev-hora"></div>
+      <div><label>Participantes (est.)</label><input id="ev-participantes"></div>
+      <div class="full"><label>Representante Stine</label><input id="ev-representante"></div>
+      <div class="full"><label>Staffer / KAM</label><input id="ev-staffer"></div>
+      <div class="full"><label>Local / Observação</label><textarea id="ev-local" rows="2"></textarea></div>
+      <div class="full" style="display:flex; gap:8px; margin-top:6px;">
+        <button type="submit" class="btn" style="background:var(--stine-green); color:#fff; flex:1;">Salvar</button>
+        <button type="button" class="btn" style="background:#eee;" onclick="closeAdminEvModal()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Invite (convite) preview modal -->
+<div class="overlay" id="inviteOverlay">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeInviteModal()">×</button>
+    <h3>🎟️ Convite do evento</h3>
+    <div style="text-align:center;">
+      <canvas id="inviteCanvas" style="max-width:100%; height:auto; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.15); background:#fff;"></canvas>
+    </div>
+    <div id="inviteDescField" style="display:none; margin-top:12px;">
+      <label style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">Descrição do evento (editável)</label>
+      <textarea id="inviteDescTextarea" rows="4" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; margin-top:4px;"></textarea>
+      <button class="btn" style="background:#eee; width:100%; margin-top:6px;" onclick="updateInviteWithDescricao()">🔄 Atualizar convite com esse texto</button>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button class="btn" style="background:var(--stine-green); color:#fff; flex:1;" onclick="downloadInvitePNG()">⬇ Baixar convite (PNG)</button>
+      <button class="btn" style="background:#eee;" onclick="closeInviteModal()">Fechar</button>
+    </div>
+    <div class="hint">Dica: no celular, toque e segure a imagem pra salvar, ou baixe e compartilhe direto nas redes.</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+
+const ORIGINAL_EVENTS = [{"id": 1, "tipo": "TOUR TÉCNICO", "tipoOriginal": "TOUR TÉCNICO DTC", "nome": "TOUR TÉCNICO EM ÁREAS DE DESENVOLVIMENTO", "dataInicial": "2026-01-06", "dataFinal": "2026-01-07", "cidade": "FOZ DO IGUAÇU", "uf": "PR", "cultura": "", "local": "MISSAL | TOLEDO | CAMPO MOURÃO |PEABIRU |ARAPONGAS | SERTANOPOLIS", "representante": "LOCAL", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 2, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "DIA DE CAMPO DIPAGRO", "dataInicial": "2025-12-16", "dataFinal": "2025-12-16", "cidade": "ALTA FLORESTA", "uf": "MT", "cultura": "", "local": "Fazenda sao Lucas", "representante": "JAKELINE MONTEIRO", "staffer": "", "status": "EXECUTADO", "participantes": "100"}, {"id": 3, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "VITRINE TECNOLOGICA DIPAGRO AGROLUZ", "dataInicial": "2026-01-06", "dataFinal": "2026-01-06", "cidade": "Campo Novo do Parecis", "uf": "MT", "cultura": "", "local": "", "representante": "LOCAL", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 4, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de Campo Mocellin", "dataInicial": "2026-01-06", "dataFinal": "2026-01-06", "cidade": "Nova Ubiratã", "uf": "MT", "cultura": "", "local": "Fazenda Santo Expedito - Marcelino Sichieri", "representante": "Robsodré", "staffer": "Vinícius Leal Chiquito", "status": "PLANEJADO", "participantes": "60"}, {"id": 5, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de campo AgroFertil", "dataInicial": "2026-01-06", "dataFinal": "2026-01-06", "cidade": "Nova Maringá", "uf": "MT", "cultura": "", "local": "Faz. Mangelita", "representante": "Pedro Sartorelli", "staffer": "Pedro Sartorelli", "status": "PLANEJADO", "participantes": "70"}, {"id": 6, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "10° DIA DE CAMPO CULTIVAR", "dataInicial": "2026-01-10", "dataFinal": "2026-01-10", "cidade": "SIDROLÂNDIA", "uf": "MS", "cultura": "", "local": "", "representante": "LOCAL", "staffer": "Bruno Reche", "status": "PLANEJADO", "participantes": null}, {"id": 7, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Vitrine Astec Agro", "dataInicial": "2026-01-06", "dataFinal": "2026-01-06", "cidade": "Nova Maringá", "uf": "MT", "cultura": "", "local": "Faz. Sulinense ll", "representante": "Pedro Sartorelli", "staffer": "Pedro Sartorelli", "status": "PLANEJADO", "participantes": "40"}, {"id": 8, "tipo": "RODADA TÉCNICA", "tipoOriginal": "RODADA TÉCNICA - MULTIPLICADORES", "nome": "RODADA TÉCNICA Sementes Morena Ensaio DP1", "dataInicial": "2026-01-07", "dataFinal": "2026-01-07", "cidade": "Campo Novo do Parecis", "uf": "MT", "cultura": "MILHO", "local": "", "representante": "Leomar Hendges", "staffer": "Andre Klein", "status": "EXECUTADO", "participantes": null}, {"id": 9, "tipo": "TOUR TÉCNICO", "tipoOriginal": "TOUR TÉCNICO DTC", "nome": "TOUR TÉCNICO EM ÁREAS DE DESENVOLVIMENTO", "dataInicial": "2026-01-12", "dataFinal": "2026-01-16", "cidade": "ITABERAÍ", "uf": "GO", "cultura": "", "local": "ITABERAÍ-GAMELEIRA DE GOIÁS-ARAGUARI-TUPACIGUARA-JATAÍ-RIO VERDE", "representante": "LOCAL", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 10, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO - SEMENTES MANÁ", "dataInicial": "2026-01-13", "dataFinal": "2026-01-13", "cidade": "ACREÚNA", "uf": "GO", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 11, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de Campo Pioneira", "dataInicial": "2026-01-07", "dataFinal": "2026-01-07", "cidade": "Sorriso", "uf": "MT", "cultura": "", "local": "Faz. 4 Irmãos - Sadi Zanatta", "representante": "", "staffer": "Wisley Guide", "status": "PLANEJADO", "participantes": "20"}, {"id": 12, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de campo Plantar", "dataInicial": "2026-01-07", "dataFinal": "2026-01-07", "cidade": "Tapurah", "uf": "MT", "cultura": "", "local": "Faz pato branco", "representante": "Pedro Sartorelli", "staffer": "Pedro Sartorelli", "status": "PLANEJADO", "participantes": "80"}, {"id": 13, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO SEMEAR", "dataInicial": "2026-01-08", "dataFinal": "2026-01-08", "cidade": "ALTA FLORESTA", "uf": "MT", "cultura": "", "local": "", "representante": "Jakeline Ribeiro", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 14, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO SAFRA 2025/2026", "dataInicial": "2026-01-15", "dataFinal": "2026-01-15", "cidade": "Maracaju", "uf": "MS", "cultura": "", "local": "Dia de Campo da Fundação MS – Fazenda Alegria", "representante": "LOCAL", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 15, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de campo Mocellin", "dataInicial": "2026-01-08", "dataFinal": "2026-01-08", "cidade": "Boa Esperança do Norte", "uf": "MT", "cultura": "", "local": "Fazenda Piratinha - Moacir Guarnieri", "representante": "Marcos Deus", "staffer": "Vinícius Leal Chiquito", "status": "PLANEJADO", "participantes": "60"}, {"id": 16, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO IGA", "dataInicial": "2026-01-16", "dataFinal": "2026-01-16", "cidade": "MONTIVIDIU", "uf": "GO", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 17, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de Campo Enlist", "dataInicial": "2026-01-08", "dataFinal": "2026-01-08", "cidade": "Sorriso", "uf": "MT", "cultura": "", "local": "Comunidade Navegantes - Faz. 4 Irmaos", "representante": "Marcos de Deus", "staffer": "Wisley Guide", "status": "PLANEJADO", "participantes": "30"}, {"id": 18, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO SÃO FRANCISCO", "dataInicial": "2026-01-17", "dataFinal": "2026-01-17", "cidade": "RIO VERDE", "uf": "GO", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 19, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO SOJA RINCÃO", "dataInicial": "2026-01-17", "dataFinal": "2026-01-17", "cidade": "SIDROLÂNDIA", "uf": "MS", "cultura": "", "local": "", "representante": "local", "staffer": "Bruno Reche", "status": "PLANEJADO", "participantes": null}, {"id": 20, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO GAPES", "dataInicial": "2026-01-19", "dataFinal": "2026-01-19", "cidade": "RIO VERDE", "uf": "GO", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 21, "tipo": "TOUR TÉCNICO", "tipoOriginal": "TOUR TÉCNICO DTC", "nome": "TOUR TÉCNICO EM ÁREAS DE DESENVOLVIMENTO", "dataInicial": "2026-01-21", "dataFinal": "2026-01-23", "cidade": "SÃO GABRIEL DO OESTE", "uf": "MS", "cultura": "", "local": "SÃO GABRIEL DO OESTE | SIDROLANDIA | DOURADOS | RIO BRILHANTE", "representante": "LOCAL", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 22, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "EXPOSTINE TURBO", "dataInicial": "2026-01-21", "dataFinal": "2026-01-21", "cidade": "JATAÍ", "uf": "GO", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 23, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR", "nome": "EXPOSTINE INDOOR", "dataInicial": "2026-01-21", "dataFinal": "2026-01-21", "cidade": "Joviânia", "uf": "GO", "cultura": "", "local": "Sindicato Rural de Joviânia", "representante": "Régis Vitória", "staffer": "", "status": "PLANEJADO", "participantes": 50}, {"id": 24, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de Campo Lobo Agro", "dataInicial": "2026-01-08", "dataFinal": "2026-01-08", "cidade": "Sinop", "uf": "MT", "cultura": "", "local": "", "representante": "Juliana Petrazzini/ João Sanchez", "staffer": "", "status": "PLANEJADO", "participantes": "100"}, {"id": 25, "tipo": "EXPOSTINE TURBO", "tipoOriginal": "EXPOSTINE TURBO - MULTIPLICADORES", "nome": "ExpoStine - Multiplicadores/Sudoeste Goiano", "dataInicial": "2026-01-22", "dataFinal": "2026-01-22", "cidade": "Jataí", "uf": "GO", "cultura": "", "local": "Ensaio DTC - Expectativa da realização do evento é no ensaio da família Priori.", "representante": "Matheus Oliveira", "staffer": "", "status": "PLANEJADO", "participantes": "50"}, {"id": 26, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO FAZENDA GRIMM", "dataInicial": "2026-01-22", "dataFinal": "2026-01-22", "cidade": "SÃO GABRIEL DO OESTE", "uf": "MS", "cultura": "", "local": "", "representante": "local", "staffer": "Vanessa Demenek", "status": "PLANEJADO", "participantes": null}, {"id": 27, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de campo Semear", "dataInicial": "2026-01-08", "dataFinal": "2026-01-08", "cidade": "Alta Floresta", "uf": "MT", "cultura": "", "local": "Fazenda zorteia", "representante": "JAKELINE MONTEIRO", "staffer": "", "status": "PLANEJADO", "participantes": "100"}, {"id": 28, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "DDC RBX Agro", "dataInicial": "2026-01-23", "dataFinal": "2026-01-23", "cidade": "Porto Nacional", "uf": "TO", "cultura": "", "local": "", "representante": "Pedro Lucas", "staffer": "Douglas Bento", "status": "PLANEJADO", "participantes": "200"}, {"id": 29, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIFUSÃO AGRÍCOLA NO CAMPO", "dataInicial": "2026-01-27", "dataFinal": "2026-01-27", "cidade": "CHAPADÃO DO SUL", "uf": "MS", "cultura": "", "local": "", "representante": "local", "staffer": "Ueiron Faustino", "status": "PLANEJADO", "participantes": null}, {"id": 30, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de campo KSB", "dataInicial": "2026-01-08", "dataFinal": "2026-01-08", "cidade": "Nova Maringá", "uf": "MT", "cultura": "", "local": "Faz. Sulinense ll", "representante": "Pedro Sartorelli", "staffer": "Pedro Sartorelli", "status": "PLANEJADO", "participantes": "80"}, {"id": 31, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "ExpoStine Indoor", "dataInicial": "2026-01-29", "dataFinal": "2026-01-29", "cidade": "Formosa", "uf": "GO", "cultura": "", "local": "Mediterranium", "representante": "Matheus Amâncio", "staffer": "Matheus", "status": "PLANEJADO", "participantes": "50"}, {"id": 32, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "ExpoStine Indoor", "dataInicial": "2026-01-29", "dataFinal": "2026-01-29", "cidade": "Formosa", "uf": "GO", "cultura": "", "local": "Mediterranium", "representante": "Matheus Amâncio", "staffer": "Matheus", "status": "PLANEJADO", "participantes": "50"}, {"id": 33, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO TERRAM", "dataInicial": "2026-01-30", "dataFinal": "2026-01-30", "cidade": "JATAÍ", "uf": "GO", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 34, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Plantagro", "dataInicial": "2026-01-09", "dataFinal": "2026-01-09", "cidade": "Nova Mutum", "uf": "MT", "cultura": "", "local": "", "representante": "Lara Martins", "staffer": "Rodrigo Ribas", "status": "PLANEJADO", "participantes": 200}, {"id": 35, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de Campo Paiol Barreiro", "dataInicial": "2026-01-09", "dataFinal": "2026-01-09", "cidade": "Sorriso", "uf": "MT", "cultura": "", "local": "Comunidade Barreiro - Cristiano Pressi", "representante": "Marcos Deus", "staffer": "Wisley Guide", "status": "PLANEJADO", "participantes": "20"}, {"id": 36, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "7° Encontro técnico na cultura da soja", "dataInicial": "2026-01-09", "dataFinal": "2026-01-09", "cidade": "Sinop", "uf": "MT", "cultura": "", "local": "", "representante": "Juliana Petrazzini/ João Sanchez", "staffer": "", "status": "PLANEJADO", "participantes": "500 pessoas "}, {"id": 37, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "DDC Maxima Consultoria", "dataInicial": "2026-01-31", "dataFinal": "2026-01-31", "cidade": "Ariquemes", "uf": "RO", "cultura": "", "local": "DDC Maxima Consultoria", "representante": "Milena Goulart", "staffer": "Lucas Donato", "status": "PLANEJADO", "participantes": null}, {"id": 38, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "DDC WM Consultoria", "dataInicial": "2026-01-31", "dataFinal": "2026-01-31", "cidade": "Porto Nacional", "uf": "TO", "cultura": "", "local": "", "representante": "Pedro Lucas", "staffer": "Douglas Bento", "status": "PLANEJADO", "participantes": "200"}, {"id": 39, "tipo": "EXPOSTINE TURBO", "tipoOriginal": "EXPOSTINE TURBO - MULTIPLICADORES", "nome": "ExpoStine - Multiplicadores/Minas Gerais", "dataInicial": "2026-02-03", "dataFinal": "2026-02-03", "cidade": "Tupaciguara", "uf": "MG", "cultura": "", "local": "Ensaio DTC - Expectativa de fazer o evento na área do Henrique Munari", "representante": "Matheus Oliveira", "staffer": "", "status": "PLANEJADO", "participantes": "50"}, {"id": 40, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "EXPOSTINE TURBO", "dataInicial": "2026-02-04", "dataFinal": "2026-02-04", "cidade": "TUPACIGUARA", "uf": "MG", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 41, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de Campo PEDIF", "dataInicial": "2026-02-05", "dataFinal": "2026-02-05", "cidade": "Silvânia", "uf": "GO", "cultura": "", "local": "", "representante": "Rafael A. Ribeiro", "staffer": "Lenini Arrais", "status": "PLANEJADO", "participantes": null}, {"id": 42, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de Campo Agroinsumos", "dataInicial": "2026-01-09", "dataFinal": "2026-01-09", "cidade": "Sinop - Gleba Nova Fronteira", "uf": "MT", "cultura": "", "local": "Gleba em Mova Fronteira a 160 km de Sinop", "representante": "Juliana Petrazzini/ João Sanchez", "staffer": "", "status": "PLANEJADO", "participantes": "150"}, {"id": 43, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DDC OILEMA", "dataInicial": "2026-02-07", "dataFinal": "2026-02-07", "cidade": "LEM", "uf": "BA", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 44, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "DDC Cataratas", "dataInicial": "2026-02-07", "dataFinal": "2026-02-07", "cidade": "Redenção", "uf": "PA", "cultura": "", "local": "", "representante": "Pedro Lucas", "staffer": "Marcelo Dourado", "status": "PLANEJADO", "participantes": "1300"}, {"id": 45, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "XIII Encontro de Variedades", "dataInicial": "2026-02-07", "dataFinal": "2026-02-07", "cidade": "Porto Alegre do Norte", "uf": "MT", "cultura": "", "local": "", "representante": "Maklane Moraes", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 46, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "Show Rural", "dataInicial": "2026-02-09", "dataFinal": "2026-02-13", "cidade": "Cascavel", "uf": "PR", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 47, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Tour Tecnológico AgroRosso", "dataInicial": "2026-02-11", "dataFinal": "2026-02-11", "cidade": "São Miguel do Passa Quatro", "uf": "GO", "cultura": "", "local": "Fazenda AgroRosso 1", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 48, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "EXPOWINTER", "dataInicial": "2026-02-12", "dataFinal": "2026-02-12", "cidade": "LEM", "uf": "BA", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 49, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "EXPOSTINE TURBO", "dataInicial": "2026-02-18", "dataFinal": "2026-02-18", "cidade": "ROSÁRIO", "uf": "BA", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 50, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "AGROROSÁRIO J&H", "dataInicial": "2026-03-05", "dataFinal": "2026-03-05", "cidade": "ROSÁRIO", "uf": "BA", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 51, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "Expodireto Cotrijal", "dataInicial": "2026-03-09", "dataFinal": "2026-03-13", "cidade": "Não-Me-Toque", "uf": "RS", "cultura": "", "local": "Não estamos com estande - visita corporativa", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 52, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de campo Mocellin", "dataInicial": "2026-01-09", "dataFinal": "2026-01-09", "cidade": "Tapurah", "uf": "MT", "cultura": "", "local": "Faz Verde Vale", "representante": "Pedro Sartorelli", "staffer": "Pedro Sartorelli", "status": "PLANEJADO", "participantes": "90"}, {"id": 53, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "Coopercampos", "dataInicial": "2026-03-24", "dataFinal": "2026-03-26", "cidade": "Campos Novos", "uf": "SC", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 54, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "TECNOSHOW COMIGO", "dataInicial": "2026-03-30", "dataFinal": "2026-04-03", "cidade": "RIO VERDE", "uf": "GO", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 55, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "ShowTec Maracaju", "dataInicial": "2026-05-19", "dataFinal": "2026-05-21", "cidade": "Maracaju", "uf": "MS", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 56, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "EP CONSULTORIA", "dataInicial": "2026-01-10", "dataFinal": "2026-01-10", "cidade": "Gaucha do Norte", "uf": "MT", "cultura": "", "local": "", "representante": "Maklane Moraes", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 57, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Grão Cheio Adagro", "dataInicial": "2026-01-10", "dataFinal": "2026-01-10", "cidade": "Sorriso", "uf": "MT", "cultura": "", "local": "Faz. Malvinas Francisco Gemmi", "representante": "Robsodré", "staffer": "Wisley Guide", "status": "PLANEJADO", "participantes": "20"}, {"id": 58, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de campo KSB", "dataInicial": "2026-01-10", "dataFinal": "2026-01-10", "cidade": "Itanhangá", "uf": "MT", "cultura": "", "local": "Sítio Franceschet", "representante": "Pedro Sartorelli", "staffer": "Pedro Sartorelli", "status": "PLANEJADO", "participantes": "90"}, {"id": 59, "tipo": "TOUR TÉCNICO", "tipoOriginal": "TOUR TÉCNICO DTC", "nome": "TOUR TÉCNICO EM ÁREAS DE DESENVOLVIMENTO", "dataInicial": "2026-01-12", "dataFinal": "2026-01-16", "cidade": "SORRISO", "uf": "MT", "cultura": "", "local": "SORRISO-LRV-DIAMANTINO-CAMPO VERDE", "representante": "LOCAL", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 60, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Encontro Técnico - JuliAgro", "dataInicial": "2026-01-13", "dataFinal": "2026-01-13", "cidade": "Querencia", "uf": "MT", "cultura": "", "local": "", "representante": "Maklane Moraes", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 61, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de Campo Coap", "dataInicial": "2026-01-13", "dataFinal": "2026-01-13", "cidade": "Sorriso", "uf": "MT", "cultura": "", "local": "Eloi Bedin- ao fundo da Coap", "representante": "Robsodré", "staffer": "Wisley Guide", "status": "PLANEJADO", "participantes": "30"}, {"id": 62, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dinetec", "dataInicial": "2026-01-14", "dataFinal": "2026-01-16", "cidade": "Canarana", "uf": "MT", "cultura": "", "local": "", "representante": "Maklane Moraes", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 63, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "2 WORKSHOP- SOJA-SUMPES", "dataInicial": "2026-01-14", "dataFinal": "2026-01-10", "cidade": "NOVO MUNDO", "uf": "MT", "cultura": "", "local": "", "representante": "Fabyane", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 64, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Ctecno Aprosoja", "dataInicial": "2026-01-15", "dataFinal": "2026-01-15", "cidade": "Campo Novo do Parecis", "uf": "MT", "cultura": "MILHO", "local": "Associação dos Produtores de Soja de Mato Grosso", "representante": "Leomar Hendges", "staffer": "Andre Klein", "status": "EXECUTADO", "participantes": 100}, {"id": 65, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Tour Soja - Bettini Consultoria e Terra Pesquisa", "dataInicial": "2026-01-16", "dataFinal": "2026-01-16", "cidade": "Primavera do Leste", "uf": "MT", "cultura": "", "local": "", "representante": "Tamila Pereira Ribeiro", "staffer": "Marcos Castoldi", "status": "PLANEJADO", "participantes": null}, {"id": 66, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de Campo Agrofertil", "dataInicial": "2026-01-16", "dataFinal": "2026-01-16", "cidade": "Sorriso", "uf": "MT", "cultura": "", "local": "Junior Carpenedo - Em frente a Cargill", "representante": "", "staffer": "Wisley Guide", "status": "PLANEJADO", "participantes": "15"}, {"id": 67, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "Dia de Campo Safras e Consultoria", "dataInicial": "2026-01-17", "dataFinal": "2026-01-17", "cidade": "Campos de Julio", "uf": "MT", "cultura": "", "local": "Fazenda Pleno Verão", "representante": "Milena Goulart", "staffer": "Ademir Dal Pont", "status": "PLANEJADO", "participantes": null}, {"id": 68, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Soja In Técnica", "dataInicial": "2026-01-21", "dataFinal": "2026-01-23", "cidade": "Querencia", "uf": "MT", "cultura": "", "local": "", "representante": "Maklane Moraes", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 69, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DDF EM CAMPO", "dataInicial": "2026-01-23", "dataFinal": "2026-01-23", "cidade": "ALTA FLORESTA", "uf": "MT", "cultura": "", "local": "", "representante": "Jakeline Ribeiro", "staffer": "LOCAL", "status": "PLANEJADO", "participantes": null}, {"id": 70, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de campo DDF", "dataInicial": "2026-01-23", "dataFinal": "2026-01-23", "cidade": "Alta Floresta", "uf": "MT", "cultura": "", "local": "Centro de pesquisa DDF", "representante": "JAKELINE MONTEIRO", "staffer": "JAKELINE MONTEIRO", "status": "PLANEJADO", "participantes": "250"}, {"id": 71, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Ctecno Aprosoja", "dataInicial": "2026-01-28", "dataFinal": "2026-01-28", "cidade": "Água Boa", "uf": "MT", "cultura": "", "local": "Associação dos Produtores de Soja de Mato Grosso", "representante": "Maklane Moraes", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 72, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de Campo - SomaField", "dataInicial": "2026-01-30", "dataFinal": "2026-01-30", "cidade": "Rondonópolis", "uf": "MT", "cultura": "", "local": "", "representante": "Tamila Pereira Ribeiro", "staffer": "Lindomar  Marciano", "status": "PLANEJADO", "participantes": null}, {"id": 73, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "EXPOSTINE TURBO", "dataInicial": "2026-01-30", "dataFinal": "2026-01-30", "cidade": "", "uf": "MT", "cultura": "", "local": "Local e data exata ainda a definir", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 74, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "DIA DE CAMPO PA SUMMIT", "dataInicial": "2026-01-31", "dataFinal": "2026-01-31", "cidade": "Diamantino", "uf": "MT", "cultura": "MILHO", "local": "", "representante": "Leomar Hendges", "staffer": "Andre Klein", "status": "EXECUTADO", "participantes": 200}, {"id": 75, "tipo": "EXPOSTINE TURBO", "tipoOriginal": "EXPOSTINE TURBO - MULTIPLICADORES", "nome": "ExpoStine - Multiplicadores/Bahia", "dataInicial": "2026-02-18", "dataFinal": "2026-02-18", "cidade": "Rosário", "uf": "BA", "cultura": "", "local": "Área de ensaio DTC - Otávio Xavier", "representante": "Matheus Oliveira", "staffer": "", "status": "PLANEJADO", "participantes": "50"}, {"id": 76, "tipo": "EVENTO CORPORATIVO", "tipoOriginal": "EVENTOS CORPORATIVOS", "nome": "Show Safra", "dataInicial": "2026-03-23", "dataFinal": "2026-03-27", "cidade": "Lucas do Rio Verde", "uf": "MT", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 77, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "Dia de Campo Pontual Agronegócios", "dataInicial": "2026-01-30", "dataFinal": "2026-01-30", "cidade": "Silvânia", "uf": "GO", "cultura": "", "local": "Rodovia GO 330, KM 89", "representante": "", "staffer": "Lenini Arrais", "status": "PLANEJADO", "participantes": null}, {"id": 78, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Competição de Cultivares AgroBrasília", "dataInicial": "2026-02-20", "dataFinal": "2026-02-20", "cidade": "Brasília", "uf": "DF", "cultura": "", "local": "AgroBrasília - PADF", "representante": "Rafael A. Ribeiro", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 79, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de Campo Plantar", "dataInicial": "2026-01-08", "dataFinal": "2026-01-08", "cidade": "Matupá", "uf": "MT", "cultura": "", "local": "", "representante": "Fabyane Guerra", "staffer": "", "status": "EXECUTADO", "participantes": "100 pessoas "}, {"id": 80, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de Campo Meta Acessória Agrícola", "dataInicial": "2026-01-10", "dataFinal": "2026-01-10", "cidade": "Matupá", "uf": "MT", "cultura": "", "local": "", "representante": "Fabyane Guerra", "staffer": "Fabyane Guerra", "status": "PLANEJADO", "participantes": "200 pessoas "}, {"id": 81, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Dia de Campo Sumpess", "dataInicial": "2026-01-14", "dataFinal": "2026-01-14", "cidade": "Guarantã do Norte", "uf": "MT", "cultura": "", "local": "", "representante": "Fabyane Guerra", "staffer": "Fabyane Guerra", "status": "PLANEJADO", "participantes": "500 pessoas "}, {"id": 82, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CLUBE STINE", "nome": "Dia de Campo Roça Agronegócios", "dataInicial": "2026-01-16", "dataFinal": "2026-01-16", "cidade": "Novo Mundo", "uf": "MT", "cultura": "", "local": "", "representante": "Fabyane Guerra", "staffer": "Fabyane Guerra", "status": "PLANEJADO", "participantes": "80 pessoas "}, {"id": 83, "tipo": "OUTRO", "tipoOriginal": "", "nome": "Evento sem nome", "dataInicial": "2026-01-20", "dataFinal": "2026-01-21", "cidade": "Toledo", "uf": "PR", "cultura": "", "local": "PR-369, KM 05", "representante": "Thiago Cappellesso", "staffer": "Thiago Cappellesso", "status": "PLANEJADO", "participantes": "40 pessoas"}, {"id": 84, "tipo": "OUTRO", "tipoOriginal": "OUTRO", "nome": "DIA DE CAMPO AGROINSUMOS - FELIZ NATAL", "dataInicial": "2025-12-11", "dataFinal": "2025-12-11", "cidade": "FELIZ NATAL", "uf": "MT", "cultura": "", "local": "Fazenda Três Amigos", "representante": "", "staffer": "AUGUSTO VILELA", "status": "EXECUTADO", "participantes": "50"}, {"id": 85, "tipo": "TOUR TÉCNICO", "tipoOriginal": "TOUR TÉCNICO DTC", "nome": "Tour técnico", "dataInicial": "2025-12-18", "dataFinal": "2025-12-18", "cidade": "Lucas do Rio verde", "uf": "MT", "cultura": "", "local": "Faz Alvorada", "representante": "Claudinei Tome Gerhardt", "staffer": "Claudinei Tome Gerhardt", "status": "EXECUTADO", "participantes": "3 Produtores "}, {"id": 86, "tipo": "TOUR TÉCNICO", "tipoOriginal": "TOUR TÉCNICO DTC", "nome": "Tour técnico", "dataInicial": "2025-12-23", "dataFinal": "2025-12-23", "cidade": "Lucas do Rio verde", "uf": "MT", "cultura": "", "local": "Faz Lorenzi", "representante": "Claudinei Tome Gerhardt", "staffer": "Claudinei Tome Gerhardt", "status": "EXECUTADO", "participantes": 4}, {"id": 87, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Nora Consultoria", "dataInicial": "2026-02-28", "dataFinal": "2026-02-28", "cidade": "Pontes e Lacerda", "uf": "MT", "cultura": "", "local": "", "representante": "Milena Goulart", "staffer": "Ademir Dal Pont", "status": "PLANEJADO", "participantes": null}, {"id": 88, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Safra Consultoria", "dataInicial": "2026-01-10", "dataFinal": "2026-01-10", "cidade": "Campos de Julio", "uf": "MT", "cultura": "", "local": "Organização via RC", "representante": "Milena Goulart", "staffer": "Ademir Dal Pont", "status": "EXECUTADO", "participantes": 50}, {"id": 89, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIFUSÃO AGRÍCOLA NO CAMPO", "dataInicial": "2026-02-25", "dataFinal": "2026-02-25", "cidade": "PARAISO DAS ÁGUAS", "uf": "MS", "cultura": "", "local": "", "representante": "local", "staffer": "Ueiron Faustino", "status": "PLANEJADO", "participantes": null}, {"id": 90, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "PASSARELA DA SOJA", "dataInicial": "2026-02-28", "dataFinal": "2026-02-28", "cidade": "LEM", "uf": "BA", "cultura": "", "local": "", "representante": "", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 97, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO MULTIPLICADOR", "nome": "SEMENTES VAN ASS", "dataInicial": "2026-06-03", "dataFinal": "2026-06-03", "cidade": "CONDOR", "uf": "RS", "cultura": "", "local": "UBS UNIÃO BR 158,KM137 - CONDOR", "representante": "Antonio Marcos L da Silva", "staffer": "Antonio Marcos L da Silva", "status": "PLANEJADO", "participantes": null}, {"id": 98, "tipo": "TOUR TÉCNICO", "tipoOriginal": "Tour com Consultores", "nome": "Inova Show - Sementes Bortoluzzi", "dataInicial": "2026-08-01", "dataFinal": "2026-08-01", "cidade": "Londrina", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "60 Consultores"}, {"id": 99, "tipo": "TOUR TÉCNICO", "tipoOriginal": "Tour com Consultorias e Agrícultores Influentes", "nome": "Consultoria", "dataInicial": "2026-01-15", "dataFinal": "2026-01-15", "cidade": "Ubirata", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "15 Agricultores"}, {"id": 100, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "Fartura Insumosc- ZT Sementes", "dataInicial": "2026-01-17", "dataFinal": "2026-01-17", "cidade": "Juranda", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "100 Agricultores"}, {"id": 101, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "Producerta - ZT Sementes", "dataInicial": "2026-01-21", "dataFinal": "2026-01-23", "cidade": "Pitanga", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "+ 500 Agriculores"}, {"id": 102, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "Inova Show - Sementes Bortoluzzi", "dataInicial": "2026-01-22", "dataFinal": "2026-01-23", "cidade": "Londrina", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "+500 Agricultores"}, {"id": 104, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-09-02", "dataFinal": "2026-09-02", "cidade": "Londrina", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "70 agricultores"}, {"id": 105, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "MK Agrícola - Sementes Tormenta", "dataInicial": "2026-01-27", "dataFinal": "2026-01-27", "cidade": "Fênix", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "85 Agricultores"}, {"id": 106, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-01-28", "dataFinal": "2026-01-28", "cidade": "Cruzmaltina", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "50 Agricultores"}, {"id": 107, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-01-29", "dataFinal": "2026-01-29", "cidade": "Ivaiporã", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "100 Agricultores"}, {"id": 108, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "MK Agrícola - Sementes Tormenta", "dataInicial": "2026-01-29", "dataFinal": "2026-01-29", "cidade": "Marialva", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "50 Agricultores"}, {"id": 109, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-01-31", "dataFinal": "2026-01-31", "cidade": "Sertaneja", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": "100 Agricultores"}, {"id": 110, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "Rally Semegrão - ZT Sementes", "dataInicial": "2026-02-02", "dataFinal": "2026-02-02", "cidade": "Londrina", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 111, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-04-02", "dataFinal": "2026-04-02", "cidade": "Apucarana", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 112, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-05-02", "dataFinal": "2026-05-02", "cidade": "Borrazópolis", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 113, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-06-02", "dataFinal": "2026-06-02", "cidade": "Primeiro de Maio", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 114, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "Ponto Rural - Sementes Coopercampos", "dataInicial": "2026-07-02", "dataFinal": "2026-07-02", "cidade": "Primeiro de Maio", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 115, "tipo": "FEIRA AGRÍCOLA", "tipoOriginal": "Feira Agrícola", "nome": "Show Rural Coopavel", "dataInicial": "2026-09-02", "dataFinal": "2026-02-13", "cidade": "Cascavel", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 116, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-10-02", "dataFinal": "2026-10-02", "cidade": "Andirá", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 117, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-11-02", "dataFinal": "2026-11-02", "cidade": "Cornélio Procópio", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 118, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-12-02", "dataFinal": "2026-12-02", "cidade": "Sertanópolis", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 119, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroInfinity - Bortoluzzi Sementes", "dataInicial": "2026-02-14", "dataFinal": "2026-02-14", "cidade": "Assai", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 120, "tipo": "EXPOSTINE TURBO", "tipoOriginal": "Expo Stine Turbo", "nome": "Coamo", "dataInicial": "2026-02-19", "dataFinal": "2026-02-19", "cidade": "Peabiru", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 121, "tipo": "FEIRA AGRÍCOLA", "tipoOriginal": "Feira Agrícola", "nome": "Show Tec Copercampos", "dataInicial": "2026-02-24", "dataFinal": "2026-02-27", "cidade": "Campos Novos", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 122, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroHara - Sementes Roos", "dataInicial": "2026-02-26", "dataFinal": "2026-02-26", "cidade": "Uraí", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 123, "tipo": "TOUR TÉCNICO", "tipoOriginal": "Tour Ténico DTC", "nome": "Stine", "dataInicial": "2026-03-03", "dataFinal": "2026-04-01", "cidade": "Sudoeste/Campos Gerais", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 124, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "Agrotech - Bortoluzzi Sementes", "dataInicial": "2026-04-02", "dataFinal": "2026-04-02", "cidade": "Maringá", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 125, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo Uniade", "nome": "COAMO", "dataInicial": "2026-01-31", "dataFinal": "2026-01-31", "cidade": "Engenheiro Beltrão", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 136, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CONSULTORIAS", "nome": "Rodada Técnica Montech consultoria", "dataInicial": "2026-02-06", "dataFinal": "2026-02-07", "cidade": "Balsas", "uf": "MA", "cultura": "", "local": "No dia 06/02 - visita a fazenda Balsas Nova (serra do penitente) e fazenda Lagarto (serra da fortaleza)\nNo dia 07/02 - apresentação da vitrine de cultivares, Fazenda Mina.", "representante": "Guilherme Leal", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 137, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo", "nome": "Dia de campo Grupo Samara", "dataInicial": "2026-02-05", "dataFinal": "2026-02-05", "cidade": "Carolina", "uf": "MA", "cultura": "", "local": "o dia de campo acontecerá na fazenda Cana-Brava do grupo Samara.", "representante": "Guilherme Leal", "staffer": "", "status": "PLANEJADO", "participantes": null}, {"id": 138, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO CLUBE STINE", "nome": "DIA DE CAMPO AGROSOL - CULTIVAR - VERA MT", "dataInicial": "2026-01-21", "dataFinal": "2026-01-21", "cidade": "VERA", "uf": "MT", "cultura": "", "local": "CEDETEC", "representante": "", "staffer": "AUGUSTO CESAR VILELA", "status": "EXECUTADO", "participantes": "60"}, {"id": 139, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "AgroInfinity - Bortoluzzi Sementes", "dataInicial": "2026-10-02", "dataFinal": "2026-10-02", "cidade": "Sertanópolis", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 140, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo - Revenda", "nome": "Zaion - Sementes Roos", "dataInicial": "2026-03-01", "dataFinal": "2026-03-01", "cidade": "FLoresta", "uf": "PR", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 141, "tipo": "DIA DE CAMPO", "tipoOriginal": "Dia de Campo Multiplicador", "nome": "ROOS", "dataInicial": "2026-02-26", "dataFinal": "2026-02-26", "cidade": "Não Me Toque", "uf": "RS", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 142, "tipo": "FEIRA AGRÍCOLA", "tipoOriginal": "Feira Agrícola", "nome": "Abertura Colheita do Arroz", "dataInicial": "2026-02-24", "dataFinal": "2026-02-26", "cidade": "Pelotas", "uf": "RS", "cultura": "", "local": "", "representante": "Douglas Vinicius Cibotto", "staffer": "Douglas Vinicius Cibotto", "status": "EXECUTADO", "participantes": null}, {"id": 145, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO", "nome": "DIA DE CAMPO AMIGOS DO MILHO", "dataInicial": "2026-05-16", "dataFinal": "2026-05-16", "cidade": "Diamantino", "uf": "MT", "cultura": "MILHO", "local": "", "representante": "Leomar Hendges", "staffer": "Andre Klein/João", "status": "PLANEJADO", "participantes": 70}, {"id": 146, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIAS DE CAMPO", "nome": "Visita Tecnica Segunda Safra CTECNO", "dataInicial": "2026-04-29", "dataFinal": "2026-04-29", "cidade": "Campo Novo do Parecis", "uf": "MT", "cultura": "MILHO", "local": "Associação dos Produtores de Soja de Mato Grosso", "representante": "Leomar Hendges", "staffer": "Andre Klein", "status": "PLANEJADO", "participantes": 100}, {"id": 147, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "13ª MILHO IN TÉCNICA", "dataInicial": "2026-08-05", "dataFinal": "2026-08-05", "cidade": "QUERENCIA", "uf": "MT", "cultura": "MILHO", "local": "ESTAÇÃO RURAL TÉCNICA", "representante": "LUANA", "staffer": "RODOLFO", "status": "PLANEJADO", "participantes": null}, {"id": 148, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO - BETTINI CONSULTORIA (INTERNO COM OS PRODUTORES CONVIDADOS)", "dataInicial": "2026-05-15", "dataFinal": "2026-05-15", "cidade": "Primavera do Leste", "uf": "MT", "cultura": "MILHO", "local": "TERRA PESQUISA E BETTINI CONSULTORIA", "representante": "Tamila Ribeiro", "staffer": "Marcos Castoldi", "status": "PLANEJADO", "participantes": null}, {"id": 149, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO - BETTINI CONSULTORIA (ABERTO AO PÚBLICO)", "dataInicial": "2026-05-16", "dataFinal": "2026-05-16", "cidade": "Primavera do Leste", "uf": "MT", "cultura": "MILHO", "local": "TERRA PESQUISA E BETTINI CONSULTORIA", "representante": "Tamila Ribeiro", "staffer": "Marcos Castoldi", "status": "PLANEJADO", "participantes": null}, {"id": 151, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO REGINALDO BRUNETTA", "dataInicial": "2026-06-06", "dataFinal": "2026-06-06", "cidade": "PORTO ALEGRE DO NORTE", "uf": "MT", "cultura": "MILHO", "local": "FAZENDA SANTA RITA", "representante": "LUANA", "staffer": "ELAINE", "status": "PLANEJADO", "participantes": null}, {"id": 153, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "DIA DE CAMPO MILHO 2026- DDF Pesquisa e inovação", "dataInicial": "2026-05-12", "dataFinal": "2026-05-12", "cidade": "Alta Floresta", "uf": "MT", "cultura": "MILHO", "local": "DDF", "representante": "Aurélio Queiroz", "staffer": "Antônio", "status": "PLANEJADO", "participantes": 100}, {"id": 154, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "250K", "dataInicial": "2026-04-29", "dataFinal": "2026-04-29", "cidade": "Alta Floresta", "uf": "MT", "cultura": "MILHO", "local": "250K", "representante": "Maklane Moraes", "staffer": "Antônio", "status": "PLANEJADO", "participantes": null}, {"id": 155, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "250K", "dataInicial": "2026-05-07", "dataFinal": "2026-05-07", "cidade": "Sinop", "uf": "MT", "cultura": "MILHO", "local": "250K", "representante": "Maklane Moraes", "staffer": "João Sanches", "status": "PLANEJADO", "participantes": null}, {"id": 156, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "V Encontro Tecnológico Milho e Algodão", "dataInicial": "2026-04-17", "dataFinal": "2026-04-17", "cidade": "Nova Mutum", "uf": "MT", "cultura": "MILHO", "local": "Plantagro Consultoria", "representante": "Vinicius Marques", "staffer": "Rodrigo Ribas", "status": "EXECUTADO", "participantes": 250}, {"id": 157, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "SUMPS", "dataInicial": "2026-05-14", "dataFinal": "2026-05-14", "cidade": "Novo Mundo", "uf": "MT", "cultura": "MILHO", "local": "SUMPS", "representante": "Aurélio Queiroz", "staffer": "João Alex", "status": "PLANEJADO", "participantes": null}, {"id": 158, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "SOMAFIELD CONSULTORIA", "dataInicial": "2026-05-29", "dataFinal": "2026-05-29", "cidade": "Itiquira", "uf": "MT", "cultura": "MILHO", "local": "SOMAFIELD Consultoria", "representante": "Tamila Ribeiro", "staffer": "Lindomar", "status": "PLANEJADO", "participantes": null}, {"id": 159, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "Dia de Campo Fazenda Lageado", "dataInicial": "2026-04-25", "dataFinal": "2026-04-25", "cidade": "Campos de Julio", "uf": "MT", "cultura": "MILHO", "local": "Fazenda Lageado", "representante": "Milena Gourlart", "staffer": "Ademir", "status": "PLANEJADO", "participantes": null}, {"id": 160, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "IV Gincana do Milho Agrofértil", "dataInicial": "2026-05-09", "dataFinal": "2026-05-09", "cidade": "Sinop", "uf": "MT", "cultura": "MILHO", "local": "Fazenda Galileia", "representante": "Maklane Moraes", "staffer": "João Sanches", "status": "PLANEJADO", "participantes": null}, {"id": 161, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "Noitec 250K", "dataInicial": "2026-05-07", "dataFinal": "2026-05-07", "cidade": "Sinop", "uf": "MT", "cultura": "MILHO", "local": "Fazenda Diego Felipe", "representante": "Maklane Moraes", "staffer": "João Sanches", "status": "PLANEJADO", "participantes": null}, {"id": 162, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "Vitrine de Híbridos", "dataInicial": "2026-05-07", "dataFinal": "2026-05-07", "cidade": "Feliz Natal", "uf": "MT", "cultura": "MILHO", "local": "Fazenda 3 amigos", "representante": "Maklane Moraes", "staffer": "Augusto", "status": "PLANEJADO", "participantes": null}, {"id": 163, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "Dia de Campo Milho", "dataInicial": "2026-05-08", "dataFinal": "2026-05-08", "cidade": "Sorriso", "uf": "MT", "cultura": "MILHO", "local": "Fazenda Girassol III Pontal do Verde", "representante": "Maklane Moraes", "staffer": "Wislley", "status": "PLANEJADO", "participantes": null}, {"id": 165, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "Dia de Campo", "dataInicial": "2026-05-13", "dataFinal": "2026-05-13", "cidade": "Sorriso", "uf": "MT", "cultura": "MILHO", "local": "Fazenda Varjão", "representante": "Maklane Moraes", "staffer": "Wislley", "status": "PLANEJADO", "participantes": null}, {"id": 166, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - SOJA E MILHO TIME COMERCIAL", "nome": "Evento sem nome", "dataInicial": "2026-03-23", "dataFinal": "2026-03-27", "cidade": "Jatai", "uf": "GO", "cultura": "MILHO", "local": "Priori Sementes / tur de milho e treinamento de soja", "representante": "", "staffer": "Stiner", "status": "PLANEJADO", "participantes": 30}, {"id": 167, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - MULTIPLICADORES DE SOJA", "nome": "Evento sem nome", "dataInicial": "2026-05-14", "dataFinal": "2026-05-14", "cidade": "Paraúna", "uf": "GO", "cultura": "SOJA", "local": "Paraúna, local sendo definido.", "representante": "", "staffer": "Matheus Oliveira / Guilherme Longaray", "status": "PLANEJADO", "participantes": "40"}, {"id": 168, "tipo": "FEIRA AGRÍCOLA", "tipoOriginal": "Feira Agrícola", "nome": "Ainos Show Agro", "dataInicial": "2026-05-06", "dataFinal": "2026-05-09", "cidade": "Juara", "uf": "MT", "cultura": "MILHO", "local": "GGM - DISTRIBUIDOR STINE", "representante": "FÁBIO HERMES", "staffer": "", "status": "PLANEJADO", "participantes": 100}, {"id": 169, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - SOJA", "nome": "EXPOSTINE INDOOR - SOJA", "dataInicial": "2026-05-05", "dataFinal": "2026-05-05", "cidade": "São Miguel do Iguaçu", "uf": "PR", "cultura": "SOJA", "local": "Salão Recanto de Festas - São Miguel do Iguaçu", "representante": "Thiago", "staffer": "", "status": "PLANEJADO", "participantes": 70}, {"id": 170, "tipo": "EXPOSTINE TURBO", "tipoOriginal": "EXPOSTINE TURBO - MILHO TIME COMERCIAL", "nome": "Evento sem nome", "dataInicial": "2026-06-02", "dataFinal": "2026-06-02", "cidade": "Luis Eduardo Magalhães", "uf": "BA", "cultura": "MILHO", "local": "", "representante": "", "staffer": "STINE", "status": "PLANEJADO", "participantes": 100}, {"id": 171, "tipo": "DIA DE CAMPO", "tipoOriginal": "DIA DE CAMPO", "nome": "Evento sem nome", "dataInicial": "2026-04-05", "dataFinal": "2026-07-05", "cidade": "Nova Mutum", "uf": "MT", "cultura": "MILHO", "local": "Nação Agricola", "representante": "Vinicius Marques", "staffer": "Rodrigo Ribas", "status": "PLANEJADO", "participantes": 250}, {"id": 172, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - SOJA E MILHO TIME COMERCIAL", "nome": "Evento sem nome", "dataInicial": "2026-05-20", "dataFinal": "2026-05-20", "cidade": "Primavera do Leste", "uf": "MT", "cultura": "SOJA", "local": "O Armazém", "representante": "", "staffer": "Gabriel Patricio", "status": "PLANEJADO", "participantes": "70"}, {"id": 173, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - SOJA E MILHO TIME COMERCIAL", "nome": "Evento sem nome", "dataInicial": "2026-08-20", "dataFinal": "2026-08-20", "cidade": "Ponta Porã", "uf": "MS", "cultura": "MILHO", "local": "Casarão de Ponta", "representante": "", "staffer": "Dalton Yone Bonacio", "status": "PLANEJADO", "participantes": 60}, {"id": 174, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - MULTIPLICADORES DE SOJA", "nome": "Evento sem nome", "dataInicial": "2026-05-14", "dataFinal": "2026-05-14", "cidade": "NOVA UBIRATÃ", "uf": "MT", "cultura": "SOJA", "local": "Espetos e Churrascaria.", "representante": "", "staffer": "Vinicius Chiquito - Paulo Eugenio", "status": "PLANEJADO", "participantes": "60 pessoas"}, {"id": 175, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - MULTIPLICADORES DE SOJA", "nome": "Evento sem nome", "dataInicial": "2026-05-28", "dataFinal": "2026-05-28", "cidade": "ALTA FLORESTA", "uf": "MT", "cultura": "SOJA", "local": "Churrascaria Cambalacho", "representante": "", "staffer": "Antonio Chmieleski - Paulo Eugenio", "status": "PLANEJADO", "participantes": "60 pessoas"}, {"id": 176, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - SOJA E MILHO TIME COMERCIAL", "nome": "Evento sem nome", "dataInicial": "2026-05-27", "dataFinal": "2026-05-27", "cidade": "Gaucha do Norte", "uf": "MT", "cultura": "SOJA", "local": "EXPO INDOOR", "representante": "", "staffer": "STINER E KAM", "status": "PLANEJADO", "participantes": "50"}, {"id": 177, "tipo": "EXPOSTINE INDOOR", "tipoOriginal": "EXPOSTINE INDOOR - MULTIPLICADORES DE SOJA", "nome": "Evento sem nome", "dataInicial": "2026-06-03", "dataFinal": "2026-06-03", "cidade": "Londrina", "uf": "PR", "cultura": "SOJA", "local": "Será realizado a ExpoStine Indoor em Londrina Paraná em parceria com a revenda AgroHara. O evento tem início às 19 hrs na churrascaria Chimarrão Grill.", "representante": "", "staffer": "Raquel Bartolomeu", "status": "PLANEJADO", "participantes": "100 Agricultores"}];
+const ADMIN_PASSWORD_HASH = "c1f023c1ee7ac915519126d8861f982dbbda1ead8e609823ac89223f5682905c"; // SHA-256 hex da senha
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DOW = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function loadEvents(){
+  const stored = localStorage.getItem('stine_eventos_2026');
+  if(stored){ try{ return JSON.parse(stored); }catch(e){} }
+  return JSON.parse(JSON.stringify(ORIGINAL_EVENTS));
+}
+function persistEvents(){ localStorage.setItem('stine_eventos_2026', JSON.stringify(EVENTS)); }
+
+let EVENTS = loadEvents();
+let currentView = 'cal';
+let calDate = new Date(); // sempre abre no mês/ano de hoje
+let isAdmin = false;
+
+function tipoClass(t){ return 't-' + t.replace(/[^A-Za-zÀ-ÿ]+/g,'-'); }
+
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+// =====================================================================
+// MOTOR DE CONVITES (PPTX -> PNG), inspirado no app AgriCard
+// =====================================================================
+const TIPOS_EVENTO = ['DIA DE CAMPO','EXPOSTINE INDOOR','EXPOSTINE TURBO','TOUR TÉCNICO','EVENTO CORPORATIVO','FEIRA AGRÍCOLA','RODADA TÉCNICA','OUTRO'];
+const INVITE_STORE_KEY = 'stine_convite_templates';
+
+function loadInviteTemplates(){
+  try{ return JSON.parse(localStorage.getItem(INVITE_STORE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveInviteTemplates(){
+  try{
+    localStorage.setItem(INVITE_STORE_KEY, JSON.stringify(INVITE_TEMPLATES));
+  }catch(e){
+    alert('Não foi possível salvar o modelo de convite neste navegador — provavelmente o arquivo .pptx tem imagens muito pesadas e passou do limite de armazenamento local. Tente um .pptx mais leve (imagens menores/comprimidas).');
+  }
+}
+let INVITE_TEMPLATES = loadInviteTemplates();
+
+function ensureJSZip(){
+  return new Promise((resolve, reject)=>{
+    if(window.JSZip){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = ()=>resolve();
+    s.onerror = ()=>reject(new Error('Falha ao carregar JSZip (verifique sua conexão com a internet).'));
+    document.head.appendChild(s);
+  });
+}
+
+// Extrai a estrutura de shapes (texto/imagem) do primeiro slide de um .pptx
+async function parsePptxTemplate(file){
+  await ensureJSZip();
+  const buf = await file.arrayBuffer();
+  const zip = await JSZip.loadAsync(buf);
+
+  const presFile = zip.file('ppt/presentation.xml');
+  if(!presFile) throw new Error('presentation.xml não encontrado — arquivo não parece ser um .pptx válido.');
+  const presXml = await presFile.async('text');
+  let wEMU = 12192000, hEMU = 6858000; // padrão 16:9
+  const sldSzTag = (presXml.match(/<p:sldSz[^/]*\/>/) || [''])[0];
+  const cxM = sldSzTag.match(/cx="(\d+)"/);
+  const cyM = sldSzTag.match(/cy="(\d+)"/);
+  if(cxM) wEMU = parseInt(cxM[1]);
+  if(cyM) hEMU = parseInt(cyM[1]);
+
+  const slideFile = zip.file('ppt/slides/slide1.xml');
+  if(!slideFile) throw new Error('O .pptx precisa ter pelo menos 1 slide (ppt/slides/slide1.xml não encontrado).');
+  const slideXml = await slideFile.async('text');
+
+  const relsFile = zip.file('ppt/slides/_rels/slide1.xml.rels');
+  const relsXml = relsFile ? await relsFile.async('text') : '';
+  const relsMap = {};
+  const relRe = /<Relationship[^>]*Id="(rId\d+)"[^>]*Target="([^"]+)"/g;
+  let rm;
+  while((rm = relRe.exec(relsXml))){
+    let target = rm[2].replace('../', 'ppt/');
+    if(!target.startsWith('ppt/')) target = 'ppt/slides/' + target;
+    relsMap[rm[1]] = target;
+  }
+
+  const shapes = [];
+  const blockRe = /<p:sp>[\s\S]*?<\/p:sp>|<p:pic>[\s\S]*?<\/p:pic>/g;
+  let bm;
+  while((bm = blockRe.exec(slideXml))){
+    const block = bm[0];
+    const isPic = block.indexOf('<p:pic>') === 0;
+    const offM = block.match(/<a:off x="(-?\d+)" y="(-?\d+)"\s*\/>/);
+    const extM = block.match(/<a:ext cx="(\d+)" cy="(\d+)"\s*\/>/);
+    if(!offM || !extM) continue; // shape sem posição explícita (herdada do layout) - fora do escopo do MVP
+    const x = parseInt(offM[1]), y = parseInt(offM[2]), w = parseInt(extM[1]), h = parseInt(extM[2]);
+
+    if(isPic){
+      const embedM = block.match(/r:embed="(rId\d+)"/);
+      if(!embedM) continue;
+      const path = relsMap[embedM[1]];
+      if(!path) continue;
+      const mediaFile = zip.file(path);
+      if(!mediaFile) continue;
+      const base64 = await mediaFile.async('base64');
+      const ext = (path.split('.').pop() || 'png').toLowerCase();
+      const mime = (ext==='jpg'||ext==='jpeg') ? 'image/jpeg' : (ext==='gif' ? 'image/gif' : 'image/png');
+      shapes.push({ type:'image', x, y, w, h, src: 'data:'+mime+';base64,'+base64 });
+    } else {
+      const paraRe = /<a:p>([\s\S]*?)<\/a:p>/g;
+      let pm; const paragraphs = [];
+      while((pm = paraRe.exec(block))){
+        const paraContent = pm[1];
+        const algnM = paraContent.match(/<a:pPr[^>]*algn="(\w+)"/);
+        const align = algnM ? algnM[1] : 'l';
+        const runRe = /<a:r>([\s\S]*?)<\/a:r>/g;
+        let rmRun; const runTexts = [];
+        let sz = null, bold = false, color = null, fontFamily = null;
+        while((rmRun = runRe.exec(paraContent))){
+          const runBlock = rmRun[1];
+          const tMatch = runBlock.match(/<a:t>([\s\S]*?)<\/a:t>/);
+          if(tMatch) runTexts.push(tMatch[1]);
+          if(sz===null){ const szM = runBlock.match(/sz="(\d+)"/); if(szM) sz = parseInt(szM[1])/100; }
+          if(!bold){ const bM = runBlock.match(/b="1"/); if(bM) bold = true; }
+          if(color===null){ const cM = runBlock.match(/<a:srgbClr val="([0-9A-Fa-f]{6})"/); if(cM) color = cM[1]; }
+          if(fontFamily===null){ const fM = runBlock.match(/<a:latin[^>]*typeface="([^"]+)"/); if(fM) fontFamily = fM[1]; }
+        }
+        paragraphs.push({ text: runTexts.join(''), align, sz, bold, color, fontFamily });
+      }
+      const fullText = paragraphs.map(p=>p.text).join('\n');
+      if(!fullText.trim()) continue; // caixa de texto vazia
+      const withSz = paragraphs.find(p=>p.sz) || {};
+      const withFont = paragraphs.find(p=>p.fontFamily) || {};
+      shapes.push({
+        type:'text', x, y, w, h,
+        text: fullText,
+        align: paragraphs[0] ? paragraphs[0].align : 'l',
+        fontSizePt: withSz.sz || 18,
+        bold: paragraphs.some(p=>p.bold),
+        color: withSz.color || '000000',
+        fontFamily: withFont.fontFamily || null,
+      });
+    }
+  }
+
+  if(shapes.length===0) throw new Error('Nenhuma caixa de texto ou imagem com posição definida foi encontrada no slide 1.');
+  return { wEMU, hEMU, shapes };
+}
+
+const MESES_MAIUSC = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+
+function buildInviteDataMap(ev, overrides){
+  const [anoI, mesI, diaI] = (ev.dataInicial||'').split('-').map(Number);
+  const base = {
+    EVENTO: ev.nome || '',
+    TIPO: ev.tipoOriginal || ev.tipo || '',
+    DATA: fmtRange(ev.dataInicial, ev.dataFinal),
+    DIA: diaI ? String(diaI).padStart(2,'0') : '',
+    MES: mesI ? MESES_MAIUSC[mesI-1] : '',
+    ANO: anoI ? String(anoI) : '',
+    HORA: ev.hora || '',
+    CIDADE_UF: [ev.cidade, ev.uf].filter(Boolean).join(' / '),
+    LOCAL: ev.local || '',
+    OBSERVACAO: ev.local || '',
+    REPRESENTANTE: ev.representante || '',
+    STAFFER: ev.staffer || '',
+    STATUS: ev.status === 'EXECUTADO' ? 'Realizado' : 'Planejado',
+    CULTURA: ev.cultura || '',
+    DESCRICAO: (INVITE_TEMPLATES[ev.tipo] && INVITE_TEMPLATES[ev.tipo].defaultDescription) || '',
+  };
+  return Object.assign(base, overrides || {});
+}
+
+function loadImageAsync(src){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=>resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function wrapTextLines(ctx, text, maxWidth){
+  const words = text.split(' ');
+  const lines = [];
+  let current = '';
+  words.forEach(word=>{
+    const test = current ? current + ' ' + word : word;
+    if(ctx.measureText(test).width > maxWidth && current){
+      lines.push(current);
+      current = word;
+    } else {
+      current = test;
+    }
+  });
+  if(current) lines.push(current);
+  return lines;
+}
+
+async function renderInviteCanvas(canvas, template, ev, targetW, overrides){
+  targetW = targetW || 1080;
+  const scale = targetW / template.wEMU;
+  const targetH = Math.round(template.hEMU * scale);
+  canvas.width = targetW;
+  canvas.height = targetH;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, targetW, targetH);
+
+  const dataMap = buildInviteDataMap(ev, overrides);
+
+  for(const shape of template.shapes){
+    const x = shape.x*scale, y = shape.y*scale, w = shape.w*scale, h = shape.h*scale;
+    if(shape.type === 'image'){
+      try{
+        const img = await loadImageAsync(shape.src);
+        ctx.drawImage(img, x, y, w, h);
+      }catch(e){ /* imagem que falhou ao carregar: ignora e segue */ }
+    } else {
+      const txt = shape.text.replace(/\{\{(\w+)\}\}/g, (m,k)=> (dataMap[k]!==undefined && dataMap[k]!=='') ? dataMap[k] : '');
+      const maxFontPx = Math.max(10, Math.round(shape.fontSizePt * 12700 * scale)); // pt -> EMU (12700) -> px
+      const family = shape.fontFamily ? ('"'+shape.fontFamily+'", ') : '';
+      ctx.fillStyle = '#' + (shape.color || '000000');
+      ctx.textBaseline = 'top';
+      const align = shape.align==='ctr' ? 'center' : (shape.align==='r' ? 'right' : 'left');
+      ctx.textAlign = align;
+      const drawX = align==='center' ? x + w/2 : (align==='right' ? x + w : x);
+
+      // Shrink-to-fit: começa no tamanho configurado no template (maxFontPx) e nunca
+      // ultrapassa esse valor; caso o texto não caiba na caixa (largura ou altura),
+      // reduz a fonte progressivamente até caber 100% dentro do placeholder.
+      const MIN_FONT_PX = 8;
+      let fontPx = maxFontPx;
+      let lines = [];
+      while(true){
+        ctx.font = (shape.bold ? 'bold ' : '') + fontPx + 'px ' + family + 'Arial, sans-serif';
+        lines = [];
+        txt.split('\n').forEach(paraLine=>{
+          wrapTextLines(ctx, paraLine, w).forEach(l=> lines.push(l));
+        });
+        // Altura real: usa a caixa de tinta (ascent+descent) medida de fato pelo canvas
+        // para cada linha, em vez de um fator fixo (ex: 1.25em) que superestima a altura
+        // necessária para textos curtos/numéricos (sem ascendentes/descendentes), o que
+        // causava encolhimento desnecessário de números grandes como o dia do evento.
+        let widestLine = 0;
+        let inkHeightSum = 0;
+        lines.forEach(l=>{
+          const m = ctx.measureText(l);
+          widestLine = Math.max(widestLine, m.width);
+          const asc = (typeof m.actualBoundingBoxAscent === 'number' && !isNaN(m.actualBoundingBoxAscent)) ? m.actualBoundingBoxAscent : fontPx*0.8;
+          const desc = (typeof m.actualBoundingBoxDescent === 'number' && !isNaN(m.actualBoundingBoxDescent)) ? m.actualBoundingBoxDescent : fontPx*0.2;
+          inkHeightSum += Math.max(asc + desc, fontPx*0.6);
+        });
+        // espaço extra entre linhas (apenas quando há mais de 1 linha)
+        const interLineGap = fontPx * 0.25 * Math.max(0, lines.length - 1);
+        const totalHeight = inkHeightSum + interLineGap;
+        const lineHeight = fontPx * 1.25; // usado só para espaçamento ao desenhar
+        const fits = totalHeight <= h && widestLine <= w;
+        if(fits || fontPx <= MIN_FONT_PX) break;
+        fontPx = Math.max(MIN_FONT_PX, fontPx - 1);
+      }
+
+      ctx.font = (shape.bold ? 'bold ' : '') + fontPx + 'px ' + family + 'Arial, sans-serif';
+      const lineHeight = fontPx * 1.25;
+      let cursorY = y;
+      lines.forEach(line=>{
+        ctx.fillText(line, drawX, cursorY);
+        cursorY += lineHeight;
+      });
+    }
+  }
+}
+
+let CURRENT_INVITE_FILENAME = 'convite';
+let CURRENT_INVITE_EV = null;
+let CURRENT_INVITE_TEMPLATE = null;
+
+function templateUsesPlaceholder(template, name){
+  const needle = '{{'+name+'}}';
+  return template.shapes.some(s => s.type==='text' && s.text.indexOf(needle) !== -1);
+}
+
+async function openInviteModalForEvent(ev){
+  const template = INVITE_TEMPLATES[ev.tipo];
+  if(!template){
+    alert('Ainda não existe um modelo de convite cadastrado para o tipo "'+ev.tipo+'". Peça para o administrador subir um modelo .pptx na área administrativa (seção "Modelos de convite").');
+    return;
+  }
+  CURRENT_INVITE_EV = ev;
+  CURRENT_INVITE_TEMPLATE = template;
+
+  const descField = document.getElementById('inviteDescField');
+  const descTextarea = document.getElementById('inviteDescTextarea');
+  const usesDescricao = templateUsesPlaceholder(template, 'DESCRICAO');
+  descField.style.display = usesDescricao ? 'block' : 'none';
+  if(usesDescricao){
+    descTextarea.value = template.defaultDescription || '';
+  }
+
+  const canvas = document.getElementById('inviteCanvas');
+  document.getElementById('inviteOverlay').classList.add('show');
+  canvas.style.opacity = '.3';
+  try{
+    await renderInviteCanvas(canvas, template, ev);
+  }catch(e){
+    console.error(e);
+    alert('Não foi possível gerar o convite. Tente novamente ou revise o modelo .pptx.');
+    closeInviteModal();
+    return;
+  }
+  canvas.style.opacity = '1';
+  CURRENT_INVITE_FILENAME = 'convite_' + (ev.nome||'evento').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').slice(0,40);
+}
+
+async function updateInviteWithDescricao(){
+  if(!CURRENT_INVITE_EV || !CURRENT_INVITE_TEMPLATE) return;
+  const canvas = document.getElementById('inviteCanvas');
+  const texto = document.getElementById('inviteDescTextarea').value;
+  canvas.style.opacity = '.3';
+  await renderInviteCanvas(canvas, CURRENT_INVITE_TEMPLATE, CURRENT_INVITE_EV, 1080, { DESCRICAO: texto });
+  canvas.style.opacity = '1';
+}
+
+function openInviteModalById(id){
+  if(id===null || id===undefined) return;
+  const ev = EVENTS.find(e=>e.id===id);
+  if(ev) openInviteModalForEvent(ev);
+}
+
+function closeInviteModal(){
+  document.getElementById('inviteOverlay').classList.remove('show');
+}
+
+function downloadInvitePNG(){
+  const canvas = document.getElementById('inviteCanvas');
+  const url = canvas.toDataURL('image/png', 1.0);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (CURRENT_INVITE_FILENAME||'convite') + '.png';
+  a.click();
+}
+
+// ---------- Gestão de modelos (área administrativa) ----------
+function renderInviteTemplatesList(){
+  const el = document.getElementById('inviteTemplatesList');
+  if(!el) return;
+  el.innerHTML = TIPOS_EVENTO.map(t=>{
+    const tpl = INVITE_TEMPLATES[t];
+    const has = !!tpl;
+    const usesDescricao = has && templateUsesPlaceholder(tpl, 'DESCRICAO');
+    const safeId = t.replace(/[^A-Za-z0-9]+/g,'_');
+    return `<div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); flex-wrap:wrap;">
+      <div style="flex:1; min-width:160px;"><b>${t}</b><br><span style="font-size:11px;color:${has?'var(--stine-green)':'var(--muted)'}">${has?'✅ Modelo carregado':'— Sem modelo'}</span></div>
+      <input type="file" accept=".pptx" id="file_${safeId}" style="display:none" onchange="handleTemplateUpload('${t.replace(/'/g,"\\'")}', this)">
+      <button class="btn" style="background:#eee;" onclick="document.getElementById('file_${safeId}').click()">${has?'🔄 Substituir':'⬆ Carregar'} .pptx</button>
+      <button class="btn" style="background:#eee;" ${usesDescricao?'':'disabled'} onclick="openDescDefaultModal('${t.replace(/'/g,"\\'")}')">📝 Descrição padrão</button>
+      <button class="btn" style="background:#eee;" ${has?'':'disabled'} onclick="testInviteTemplate('${t.replace(/'/g,"\\'")}')">👁️ Testar</button>
+      <button class="btn" style="background:#eee; color:var(--danger);" ${has?'':'disabled'} onclick="removeInviteTemplate('${t.replace(/'/g,"\\'")}')">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+async function handleTemplateUpload(tipo, inputEl){
+  const file = inputEl.files[0];
+  if(!file) return;
+  if(!file.name.toLowerCase().endsWith('.pptx')){
+    alert('Envie um arquivo .pptx (PowerPoint).');
+    inputEl.value=''; return;
+  }
+  try{
+    const parsed = await parsePptxTemplate(file);
+    INVITE_TEMPLATES[tipo] = parsed;
+    saveInviteTemplates();
+    renderInviteTemplatesList();
+    if(templateUsesPlaceholder(parsed, 'DESCRICAO')){
+      alert('Modelo de convite carregado para "'+tipo+'"! Esse modelo tem um campo de descrição — defina o texto padrão em seguida.');
+      openDescDefaultModal(tipo);
+    } else {
+      alert('Modelo de convite carregado para "'+tipo+'"! (' + parsed.shapes.length + ' elementos detectados no slide)');
+    }
+  }catch(err){
+    console.error(err);
+    alert('Não foi possível ler esse .pptx: ' + err.message);
+  }
+  inputEl.value = '';
+}
+
+let CURRENT_DESC_TIPO = null;
+function openDescDefaultModal(tipo){
+  const tpl = INVITE_TEMPLATES[tipo];
+  if(!tpl) return;
+  CURRENT_DESC_TIPO = tipo;
+  document.getElementById('descDefaultTitle').textContent = 'Descrição padrão — ' + tipo;
+  document.getElementById('descDefaultTextarea').value = tpl.defaultDescription || '';
+  document.getElementById('descDefaultOverlay').classList.add('show');
+}
+function closeDescDefaultModal(){
+  document.getElementById('descDefaultOverlay').classList.remove('show');
+}
+function saveDescDefault(){
+  if(!CURRENT_DESC_TIPO) return;
+  const tpl = INVITE_TEMPLATES[CURRENT_DESC_TIPO];
+  if(!tpl) return;
+  tpl.defaultDescription = document.getElementById('descDefaultTextarea').value;
+  saveInviteTemplates();
+  closeDescDefaultModal();
+  alert('Descrição padrão salva para "'+CURRENT_DESC_TIPO+'".');
+}
+
+
+function removeInviteTemplate(tipo){
+  if(!confirm('Remover o modelo de convite de "'+tipo+'"?')) return;
+  delete INVITE_TEMPLATES[tipo];
+  saveInviteTemplates();
+  renderInviteTemplatesList();
+}
+
+function testInviteTemplate(tipo){
+  const sample = {
+    id: 0, tipo: tipo, tipoOriginal: tipo, nome: 'Evento de teste',
+    dataInicial: todayISO(), dataFinal: todayISO(),
+    cidade: 'Rio Verde', uf: 'GO', local: 'Fazenda Exemplo',
+    representante: 'Equipe Stine', staffer: '', status: 'PLANEJADO', participantes: '', cultura: 'SOJA', hora: '14:00',
+  };
+  openInviteModalForEvent(sample);
+}
+
+
+async function sha256(msg){
+  const enc = new TextEncoder().encode(msg);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function openLogin(){ document.getElementById('loginOverlay').classList.add('show'); document.getElementById('pwInput').value=''; document.getElementById('loginErr').style.display='none'; }
+function closeLogin(){ document.getElementById('loginOverlay').classList.remove('show'); }
+async function tryLogin(){
+  const pw = document.getElementById('pwInput').value;
+  const hash = await sha256(pw);
+  if(hash === ADMIN_PASSWORD_HASH){
+    closeLogin(); enterAdmin();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+function enterAdmin(){
+  isAdmin = true;
+  document.getElementById('publicView').style.display='none';
+  document.getElementById('adminPanel').classList.add('show');
+  document.getElementById('btnAdmin').style.display='none';
+  document.getElementById('btnPublic').style.display='inline-block';
+  renderAdmin();
+}
+function exitAdmin(){
+  isAdmin = false;
+  document.getElementById('publicView').style.display='block';
+  document.getElementById('adminPanel').classList.remove('show');
+  document.getElementById('btnAdmin').style.display='inline-block';
+  document.getElementById('btnPublic').style.display='none';
+  renderPublic();
+}
+
+let CURRENT_DETAIL_EVENT_ID = null;
+function closeDetail(){ document.getElementById('detailOverlay').classList.remove('show'); }
+function showDetail(ev){
+  document.getElementById('detNome').textContent = ev.nome;
+  document.getElementById('detTipo').textContent = ev.tipoOriginal || ev.tipo;
+  document.getElementById('detData').textContent = fmtRange(ev.dataInicial, ev.dataFinal);
+  document.getElementById('detCidade').textContent = [ev.cidade, ev.uf].filter(Boolean).join(' / ') || '—';
+  document.getElementById('detCultura').textContent = ev.cultura || '—';
+  document.getElementById('detRep').textContent = ev.representante || '—';
+  document.getElementById('detStaff').textContent = ev.staffer || '—';
+  document.getElementById('detStatus').textContent = ev.status;
+  document.getElementById('detHora').textContent = ev.hora || '—';
+  document.getElementById('detPart').textContent = ev.participantes || '—';
+  document.getElementById('detObs').textContent = ev.local || '—';
+  CURRENT_DETAIL_EVENT_ID = ev.id;
+  const btnConvite = document.getElementById('btnGerarConviteDetail');
+  const hasTemplate = !!INVITE_TEMPLATES[ev.tipo];
+  btnConvite.style.opacity = hasTemplate ? '1' : '.5';
+  btnConvite.title = hasTemplate ? '' : 'Nenhum modelo de convite cadastrado para este tipo de evento ainda.';
+  document.getElementById('detailOverlay').classList.add('show');
+}
+
+function fmtDate(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function fmtRange(a,b){
+  if(a===b || !b) return fmtDate(a);
+  return fmtDate(a) + ' a ' + fmtDate(b);
+}
+
+// ---------- FILTERS ----------
+function populateSelectOptions(prefix){
+  const ufs = [...new Set(EVENTS.map(e=>e.uf).filter(Boolean))].sort();
+  const tipos = [...new Set(EVENTS.map(e=>e.tipo).filter(Boolean))].sort();
+  const ufSel = document.getElementById(prefix+'UF');
+  ufSel.innerHTML = '<option value="">Todas</option>';
+  ufs.forEach(u=>{ const o=document.createElement('option'); o.value=u; o.textContent=u; ufSel.appendChild(o); });
+  const tipoSel = document.getElementById(prefix+'Tipo');
+  tipoSel.innerHTML = '<option value="">Todos</option>';
+  tipos.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; tipoSel.appendChild(o); });
+
+  const months = [...new Set(EVENTS.map(e=>e.dataInicial.slice(0,7)))].sort();
+  const monthSel = document.getElementById(prefix+'Month');
+  const prevVal = monthSel.value;
+  monthSel.innerHTML = '<option value="">Todos os meses</option>';
+  months.forEach(m=>{
+    const [y,mo] = m.split('-');
+    const o=document.createElement('option'); o.value=m; o.textContent = MESES[parseInt(mo)-1] + '/' + y;
+    monthSel.appendChild(o);
+  });
+  monthSel.value = prevVal;
+}
+
+function populateFilterOptions(){
+  populateSelectOptions('f');
+  populateSelectOptions('a');
+}
+
+function getFilteredGeneric(prefix){
+  const month = document.getElementById(prefix+'Month').value;
+  const uf = document.getElementById(prefix+'UF').value;
+  const tipo = document.getElementById(prefix+'Tipo').value;
+  const status = document.getElementById(prefix+'Status').value;
+  const searchId = prefix==='a' ? 'adminSearch' : 'fSearch';
+  const q = document.getElementById(searchId).value.trim().toLowerCase();
+  return EVENTS.filter(e=>{
+    if(month && e.dataInicial.slice(0,7)!==month) return false;
+    if(uf && e.uf!==uf) return false;
+    if(tipo && e.tipo!==tipo) return false;
+    if(status && e.status!==status) return false;
+    if(q){
+      const hay = [e.nome,e.cidade,e.representante,e.staffer,e.local].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function getFiltered(){ return getFilteredGeneric('f'); }
+function getAdminFiltered(){ return getFilteredGeneric('a'); }
+
+function setView(v){
+  currentView = v;
+  document.getElementById('btnCalView').classList.toggle('active', v==='cal');
+  document.getElementById('btnListView').classList.toggle('active', v==='list');
+  document.getElementById('calendarView').style.display = v==='cal' ? 'block':'none';
+  document.getElementById('listView').style.display = v==='list' ? 'block':'none';
+  renderPublic();
+}
+
+function changeMonth(delta){
+  calDate.setMonth(calDate.getMonth()+delta);
+  renderPublic();
+}
+
+function renderKpis(target, list){
+  const total = list.length;
+  const planejados = list.filter(e=>e.status==='PLANEJADO').length;
+  const executados = list.filter(e=>e.status==='EXECUTADO').length;
+  const ufsCount = new Set(list.map(e=>e.uf).filter(Boolean)).size;
+  target.innerHTML = `
+    <div class="kpi"><div class="num">${total}</div><div class="lbl">Eventos</div></div>
+    <div class="kpi"><div class="num">${planejados}</div><div class="lbl">Planejados</div></div>
+    <div class="kpi"><div class="num">${executados}</div><div class="lbl">Executados</div></div>
+    <div class="kpi"><div class="num">${ufsCount}</div><div class="lbl">Estados (UF)</div></div>
+  `;
+}
+
+function renderCalendarDow(){
+  const el = document.getElementById('calDow');
+  el.innerHTML = DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+}
+
+function renderCalendar(list){
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  document.getElementById('calTitle').textContent = `${MESES[m]} de ${y}`;
+  const firstDow = new Date(y,m,1).getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const todayISO = new Date().toISOString().slice(0,10);
+
+  const byDay = {};
+  list.forEach(e=>{
+    let d1 = new Date(e.dataInicial), d2 = new Date(e.dataFinal||e.dataInicial);
+    for(let d=new Date(d1); d<=d2; d.setDate(d.getDate()+1)){
+      const iso = d.toISOString().slice(0,10);
+      if(iso.slice(0,7) === `${y}-${String(m+1).padStart(2,'0')}`){
+        (byDay[iso] = byDay[iso]||[]).push(e);
+      }
+    }
+  });
+
+  let html = '';
+  for(let i=0;i<firstDow;i++) html += '<div class="cal-day empty"></div>';
+  for(let day=1; day<=daysInMonth; day++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayEvents = byDay[iso]||[];
+    const isToday = iso===todayISO;
+    let chips = dayEvents.slice(0,3).map(e=>
+      `<div class="ev-chip ${tipoClass(e.tipo)} status-${e.status}" onclick='showDetailById(${e.id})' title="${e.nome.replace(/"/g,'&quot;')}">${e.nome}</div>`
+    ).join('');
+    if(dayEvents.length>3) chips += `<div class="more-chip" onclick="alert('${dayEvents.length} eventos neste dia. Use a Lista para ver todos.')">+${dayEvents.length-3} mais</div>`;
+    html += `<div class="cal-day ${isToday?'today':''}"><div class="d-num">${day}</div>${chips}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+function showDetailById(id){
+  const ev = EVENTS.find(e=>e.id===id);
+  if(ev) showDetail(ev);
+}
+
+function renderList(list){
+  const sorted = [...list].sort((a,b)=> a.dataInicial.localeCompare(b.dataInicial));
+  document.getElementById('listBody').innerHTML = sorted.map(e=>`
+    <tr style="cursor:pointer" onclick="showDetailById(${e.id})">
+      <td>${fmtRange(e.dataInicial,e.dataFinal)}</td>
+      <td>${e.nome}</td>
+      <td><span class="badge ${tipoClass(e.tipo)}">${e.tipo}</span></td>
+      <td>${[e.cidade,e.uf].filter(Boolean).join(' / ')||'—'}</td>
+      <td>${e.representante||'—'}</td>
+      <td><span class="badge status-badge ${e.status}">${e.status}</span></td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:20px;">Nenhum evento encontrado.</td></tr>';
+}
+
+function renderPublic(){
+  const list = getFiltered();
+  renderKpis(document.getElementById('kpisPublic'), list);
+  renderCalendarDow();
+  if(currentView==='cal') renderCalendar(list); else renderList(list);
+}
+
+// ---------- NEW EVENT (público, sem precisar de admin) ----------
+function openNewEventModal(){
+  document.getElementById('pubEvForm').reset();
+  const min = todayISO();
+  document.getElementById('pub-dataInicial').min = min;
+  document.getElementById('pub-dataFinal').min = min;
+  document.getElementById('newEventOverlay').classList.add('show');
+}
+function closeNewEventModal(){
+  document.getElementById('newEventOverlay').classList.remove('show');
+}
+function savePublicEvent(evt){
+  evt.preventDefault();
+  const dataInicial = document.getElementById('pub-dataInicial').value;
+  const data = {
+    id: Math.max(0,...EVENTS.map(e=>e.id))+1,
+    tipo: document.getElementById('pub-tipo').value,
+    tipoOriginal: document.getElementById('pub-tipo').value,
+    nome: document.getElementById('pub-nome').value,
+    dataInicial: dataInicial,
+    dataFinal: document.getElementById('pub-dataFinal').value || dataInicial,
+    cidade: document.getElementById('pub-cidade').value,
+    uf: document.getElementById('pub-uf').value.toUpperCase(),
+    cultura: document.getElementById('pub-cultura').value,
+    local: document.getElementById('pub-local').value,
+    representante: document.getElementById('pub-representante').value,
+    staffer: document.getElementById('pub-staffer').value,
+    status: 'PLANEJADO',
+    hora: document.getElementById('pub-hora').value,
+    participantes: document.getElementById('pub-participantes').value,
+  };
+  EVENTS.push(data);
+  persistEvents();
+  closeNewEventModal();
+  populateFilterOptions();
+  const [y,m] = data.dataInicial.split('-');
+  calDate = new Date(parseInt(y), parseInt(m)-1, 1);
+  renderPublic();
+  if(isAdmin) renderAdmin();
+  if(INVITE_TEMPLATES[data.tipo]){
+    openInviteModalForEvent(data);
+  } else {
+    alert('Evento adicionado! Ele já aparece na agenda deste navegador.\n\n(Ainda não há modelo de convite cadastrado para "'+data.tipo+'".)');
+  }
+}
+
+// ---------- ADMIN ----------
+function renderAdmin(){
+  renderAdminTable();
+  renderCharts();
+  renderInviteTemplatesList();
+}
+
+function renderAdminTable(){
+  const filtered = getAdminFiltered();
+  renderKpis(document.getElementById('kpisAdmin'), filtered);
+  const sorted = [...filtered].sort((a,b)=>a.dataInicial.localeCompare(b.dataInicial));
+  document.getElementById('adminTableBody').innerHTML = sorted.map(e=>`
+    <tr>
+      <td>${fmtRange(e.dataInicial,e.dataFinal)}</td>
+      <td>${e.nome}</td>
+      <td>${[e.cidade,e.uf].filter(Boolean).join('/')||'—'}</td>
+      <td><span class="badge status-badge ${e.status}">${e.status}</span></td>
+      <td>
+        <button class="icon-btn edit" onclick="editEvent(${e.id})">✏️</button>
+        <button class="icon-btn del" onclick="deleteEvent(${e.id})">🗑️</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px;">Nenhum evento.</td></tr>';
+}
+
+function renderCharts(){
+  const byTipo = {};
+  EVENTS.forEach(e=> byTipo[e.tipo] = (byTipo[e.tipo]||0)+1 );
+  const maxTipo = Math.max(...Object.values(byTipo),1);
+  document.getElementById('chartTipo').innerHTML = Object.entries(byTipo).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="chart-bar"><div class="label">${k}</div><div class="bar-bg"><div class="bar-fill" style="width:${v/maxTipo*100}%"></div></div><div class="val">${v}</div></div>
+  `).join('');
+
+  const byUF = {};
+  EVENTS.forEach(e=> { if(e.uf) byUF[e.uf] = (byUF[e.uf]||0)+1 });
+  const maxUF = Math.max(...Object.values(byUF),1);
+  document.getElementById('chartUF').innerHTML = Object.entries(byUF).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="chart-bar"><div class="label">${k}</div><div class="bar-bg"><div class="bar-fill" style="width:${v/maxUF*100}%"></div></div><div class="val">${v}</div></div>
+  `).join('');
+}
+
+function resetForm(){
+  document.getElementById('evForm').reset();
+  document.getElementById('ev-id').value='';
+  document.getElementById('formTitle').textContent = '➕ Novo evento';
+}
+
+function openAdminEvModal(){
+  resetForm();
+  const min = todayISO();
+  document.getElementById('ev-dataInicial').min = min;
+  document.getElementById('ev-dataFinal').min = min;
+  document.getElementById('adminEvOverlay').classList.add('show');
+}
+function closeAdminEvModal(){
+  document.getElementById('adminEvOverlay').classList.remove('show');
+}
+
+function editEvent(id){
+  const e = EVENTS.find(x=>x.id===id);
+  if(!e){ alert('Evento não encontrado (id '+id+').'); return; }
+  resetForm();
+  document.getElementById('ev-dataInicial').removeAttribute('min');
+  document.getElementById('ev-dataFinal').removeAttribute('min');
+  document.getElementById('ev-id').value = e.id;
+  document.getElementById('ev-nome').value = e.nome;
+  document.getElementById('ev-dataInicial').value = e.dataInicial;
+  document.getElementById('ev-dataFinal').value = e.dataFinal;
+  document.getElementById('ev-tipo').value = e.tipo;
+  document.getElementById('ev-status').value = e.status;
+  document.getElementById('ev-cidade').value = e.cidade||'';
+  document.getElementById('ev-uf').value = e.uf||'';
+  document.getElementById('ev-cultura').value = e.cultura||'';
+  document.getElementById('ev-hora').value = e.hora||'';
+  document.getElementById('ev-participantes').value = e.participantes||'';
+  document.getElementById('ev-representante').value = e.representante||'';
+  document.getElementById('ev-staffer').value = e.staffer||'';
+  document.getElementById('ev-local').value = e.local||'';
+  document.getElementById('formTitle').textContent = '✏️ Editar evento #'+e.id;
+  document.getElementById('adminEvOverlay').classList.add('show');
+}
+
+function deleteEvent(id){
+  if(!confirm('Excluir este evento?')) return;
+  EVENTS = EVENTS.filter(e=>e.id!==id);
+  persistEvents();
+  renderAdmin();
+}
+
+function saveEvent(evt){
+  evt.preventDefault();
+  const idVal = document.getElementById('ev-id').value;
+  const data = {
+    id: idVal ? parseInt(idVal) : (Math.max(0,...EVENTS.map(e=>e.id))+1),
+    tipo: document.getElementById('ev-tipo').value,
+    tipoOriginal: document.getElementById('ev-tipo').value,
+    nome: document.getElementById('ev-nome').value,
+    dataInicial: document.getElementById('ev-dataInicial').value,
+    dataFinal: document.getElementById('ev-dataFinal').value || document.getElementById('ev-dataInicial').value,
+    cidade: document.getElementById('ev-cidade').value,
+    uf: document.getElementById('ev-uf').value.toUpperCase(),
+    cultura: document.getElementById('ev-cultura').value,
+    local: document.getElementById('ev-local').value,
+    representante: document.getElementById('ev-representante').value,
+    staffer: document.getElementById('ev-staffer').value,
+    status: document.getElementById('ev-status').value,
+    hora: document.getElementById('ev-hora').value,
+    participantes: document.getElementById('ev-participantes').value,
+  };
+  if(idVal){
+    const idx = EVENTS.findIndex(e=>e.id===data.id);
+    if(idx>=0) EVENTS[idx]=data;
+  } else {
+    EVENTS.push(data);
+  }
+  const wasNew = !idVal;
+  persistEvents();
+  resetForm();
+  closeAdminEvModal();
+  populateFilterOptions();
+  renderAdmin();
+  if(wasNew && INVITE_TEMPLATES[data.tipo]){
+    openInviteModalForEvent(data);
+  } else {
+    alert('Evento salvo com sucesso.');
+  }
+}
+
+function exportXLSX(){
+  const cols = [
+    ['nome','Nome do evento'],
+    ['tipo','Tipo'],
+    ['tipoOriginal','Tipo (original planilha)'],
+    ['dataInicial','Data inicial'],
+    ['dataFinal','Data final'],
+    ['hora','Hora'],
+    ['cidade','Cidade'],
+    ['uf','UF'],
+    ['cultura','Cultura'],
+    ['local','Local / Observação'],
+    ['representante','Representante Stine'],
+    ['staffer','Staffer / KAM'],
+    ['status','Status'],
+    ['participantes','Participantes (est.)'],
+  ];
+  const sorted = [...EVENTS].sort((a,b)=>a.dataInicial.localeCompare(b.dataInicial));
+  const rows = sorted.map(e=>{
+    const row = {};
+    cols.forEach(function(pair){ row[pair[1]] = e[pair[0]] !== undefined && e[pair[0]] !== null ? e[pair[0]] : ''; });
+    return row;
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = cols.map(function(pair){ return { wch: (pair[0]==='nome'||pair[0]==='local') ? 40 : 16 }; });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Eventos 2026');
+  XLSX.writeFile(wb, 'agenda_eventos_stine_2026.xlsx');
+}
+
+function restoreOriginal(){
+  if(!confirm('Isso vai descartar todas as alterações feitas neste navegador e voltar aos dados originais da planilha. Continuar?')) return;
+  EVENTS = JSON.parse(JSON.stringify(ORIGINAL_EVENTS));
+  persistEvents();
+  populateFilterOptions();
+  renderAdmin();
+}
+
+// ---------- INIT ----------
+document.getElementById('fMonth').addEventListener('change', ()=>{
+  const v = document.getElementById('fMonth').value;
+  if(v){ const [y,m]=v.split('-'); calDate = new Date(parseInt(y), parseInt(m)-1, 1); }
+  renderPublic();
+});
+['fUF','fTipo','fStatus'].forEach(id=> document.getElementById(id).addEventListener('change', renderPublic));
+document.getElementById('fSearch').addEventListener('input', renderPublic);
+
+// data final nunca pode ser antes da data inicial escolhida
+document.getElementById('pub-dataInicial').addEventListener('change', function(){
+  document.getElementById('pub-dataFinal').min = this.value;
+});
+document.getElementById('ev-dataInicial').addEventListener('change', function(){
+  document.getElementById('ev-dataFinal').min = this.value;
+});
+
+// filtros da área administrativa
+['aMonth','aUF','aTipo','aStatus'].forEach(id=> document.getElementById(id).addEventListener('change', renderAdminTable));
+document.getElementById('adminSearch').addEventListener('input', renderAdminTable);
+
+populateFilterOptions();
+renderPublic();
+</script>
+</body>
+</html>
