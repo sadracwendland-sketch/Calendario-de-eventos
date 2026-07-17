@@ -488,64 +488,9 @@ async function fetchInviteTemplatesFromCloud(){
   }
 }
 
-// Converte um data-URL (data:image/png;base64,...) em Blob para envio ao Storage
-function dataUrlToBlob(dataUrl){
-  const comma = dataUrl.indexOf(',');
-  const meta = dataUrl.slice(0, comma);
-  const b64 = dataUrl.slice(comma + 1);
-  const mime = (meta.match(/data:([^;]+)/) || [null, 'image/png'])[1];
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return { blob: new Blob([bytes], { type: mime }), mime: mime };
-}
-
-// Sobe para o Supabase Storage (bucket publico "convites") as imagens do template
-// que ainda estejam em base64, e devolve uma copia do template com cada src trocado
-// pela URL publica. Assim o jsonb gravado no banco cai de varios MB para poucos KB.
-// Imagens que ja sao URL (http/https) passam direto, sem novo upload.
-async function uploadInviteImagesToStorage(tipo, templateObj){
-  const safeTipo = tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_');
-  const uploaded = {}; // dedupe: o mesmo data-URL so sobe uma vez
-  const shapes = [];
-  let idx = 0;
-  for(const shape of templateObj.shapes){
-    if(shape.type !== 'image' || !shape.src || !shape.src.startsWith('data:')){
-      shapes.push(shape);
-      continue;
-    }
-    if(uploaded[shape.src]){
-      shapes.push(Object.assign({}, shape, { src: uploaded[shape.src] }));
-      continue;
-    }
-    const conv = dataUrlToBlob(shape.src);
-    const ext = conv.mime === 'image/jpeg' ? 'jpg' : (conv.mime === 'image/gif' ? 'gif' : 'png');
-    const objPath = safeTipo + '/' + Date.now() + '_' + (idx++) + '.' + ext;
-    const res = await fetch(SUPABASE_URL + '/storage/v1/object/convites/' + objPath, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': conv.mime,
-        'x-upsert': 'true'
-      },
-      body: conv.blob
-    });
-    if(!res.ok) throw new Error('Falha ao subir imagem do convite para o Storage: HTTP ' + res.status + ' ' + (await res.text()));
-    const publicUrl = SUPABASE_URL + '/storage/v1/object/public/convites/' + objPath;
-    uploaded[shape.src] = publicUrl;
-    shapes.push(Object.assign({}, shape, { src: publicUrl }));
-  }
-  return Object.assign({}, templateObj, { shapes: shapes });
-}
-
 async function pushInviteTemplateToCloud(tipo, templateObj){
   try{
-    // 1) Imagens vao para o Storage; no banco fica so a URL publica de cada uma.
-    const slim = await uploadInviteImagesToStorage(tipo, templateObj);
-    // 2) Upsert com on_conflict no "tipo" (chave primaria): nunca apaga o registro
-    //    antigo — se a gravacao falhar, o modelo anterior continua na nuvem.
-    const res = await fetch(SUPABASE_URL + '/rest/v1/stine_convite_templates?on_conflict=tipo', {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/stine_convite_templates', {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -553,12 +498,9 @@ async function pushInviteTemplateToCloud(tipo, templateObj){
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates,return=minimal'
       },
-      body: JSON.stringify([{ tipo: tipo, data: slim, updated_at: new Date().toISOString() }])
+      body: JSON.stringify([{ tipo: tipo, data: templateObj }])
     });
     if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
-    // 3) A copia local tambem fica enxuta (nao estoura mais a quota do localStorage).
-    INVITE_TEMPLATES[tipo] = slim;
-    saveInviteTemplates();
     return true;
   }catch(e){
     console.error('Falha ao enviar modelo de convite para a nuvem.', e);
@@ -713,9 +655,6 @@ function buildInviteDataMap(ev, overrides){
 function loadImageAsync(src){
   return new Promise((resolve, reject)=>{
     const img = new Image();
-    // Imagens vindas do Supabase Storage (URL http/https) precisam de crossOrigin
-    // para nao "sujar" o canvas e quebrar o download do PNG (toDataURL).
-    if(/^https?:/i.test(src)) img.crossOrigin = 'anonymous';
     img.onload = ()=>resolve(img);
     img.onerror = reject;
     img.src = src;
@@ -923,8 +862,6 @@ async function handleTemplateUpload(tipo, inputEl){
     INVITE_TEMPLATES[tipo] = parsed;
     saveInviteTemplates();
     renderInviteTemplatesList();
-    // pushInviteTemplateToCloud sobe as imagens para o Storage e regrava
-    // INVITE_TEMPLATES[tipo] com a versao enxuta (URLs no lugar de base64).
     const synced = await pushInviteTemplateToCloud(tipo, parsed);
     const syncMsg = synced
       ? 'Modelo enviado para a nuvem — já está disponível para qualquer pessoa que abrir o link.'
